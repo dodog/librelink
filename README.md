@@ -3,7 +3,8 @@
 [![Validate with Hassfest](https://github.com/dodog/librelink/actions/workflows/hassfest.yaml/badge.svg)](https://github.com/dodog/librelink/actions/workflows/hassfest.yaml)
 [![Validate with HACS](https://github.com/dodog/librelink/actions/workflows/validate.yaml/badge.svg)](https://github.com/dodog/librelink/actions/workflows/validate.yaml)
 
-Forked from [@gillesvs](https://github.com/gillesvs/librelink) All credits goes to him.
+Forked from [@gillesvs](https://github.com/gillesvs/librelink) and [@kubasaw](https://github.com/kubasaw/librelink) 
+All credit goes to them.
 
 # LibrelinkUp Integration for Home Assistant 
 
@@ -55,4 +56,4 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 
 ***
 
-<a href="https://www.buymeacoffee.com/roan7dxbbb" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+<a href="https://ko-fi.com/dodog" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
