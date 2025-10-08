@@ -3,6 +3,8 @@
 [![Validate with Hassfest](https://github.com/dodog/librelink/actions/workflows/hassfest.yaml/badge.svg)](https://github.com/dodog/librelink/actions/workflows/hassfest.yaml)
 [![Validate with HACS](https://github.com/dodog/librelink/actions/workflows/validate.yaml/badge.svg)](https://github.com/dodog/librelink/actions/workflows/validate.yaml)
 
+Forked from [@gillesvs](https://github.com/gillesvs/librelink) All credits goes to him.
+
 # LibrelinkUp Integration for Home Assistant 
 
 
