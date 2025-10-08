@@ -1,0 +1,23 @@
+{
+  "title": "Integrácia LibreLink",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Zadajte svoj email a heslo",
+        "description": "Dokumentácia: https://github.com/dodog/librelink",
+        "data": {
+          "username": "Email",
+          "password": "Heslo"
+        }
+      }
+    },
+    "error": {
+      "auth": "Používateľské meno/heslo nie je správne.",
+      "connection": "Nie je možné sa pripojiť k serveru.",
+      "unknown": "Vyskytla sa neznáma chyba."
+    },
+    "abort": {
+      "already_configured": "Zariadenie je už nastavené"
+    }
+  }
+}

@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Enter your mail and password",
-        "description": "Documentation: https://github.com/gillesvs/librelink",
+        "description": "Documentation: https://github.com/dodog/librelink",
         "data": {
           "username": "Mail",
           "password": "Password"
