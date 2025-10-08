@@ -4,8 +4,8 @@
   "codeowners": ["@gillesvs"],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://github.com/gillesvs/librelink",
+  "documentation": "https://github.com/dodog/librelink",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/gillesvs/librelink/issues",
-  "version": "1.2.3"
+  "issue_tracker": "https://github.com/dodog/librelink/issues",
+  "version": "1.2.4"
 }
