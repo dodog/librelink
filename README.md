@@ -28,11 +28,11 @@ Platform | Description
 - Is Low  | True of False.
 
 ## Illustration with a custom:mini-graph-card
+<img width="612" height="414" alt="302025877-bfed1b2b-dbf7-4666-a202-885ff3db67b8" src="https://github.com/user-attachments/assets/19257952-2cce-4872-8db3-4738889430b2" />
 
-![image](https://github.com/dodog/librelink/assets/51242147/bfed1b2b-dbf7-4666-a202-885ff3db67b8)
 
 And the yaml if you like this card:
-https://github.com/gillesvs/librelink/blob/main/custom_components/librelink/mini-graph-glucose.yml
+https://github.com/dodog/librelink/blob/main/custom_components/librelink/mini-graph-glucose.yml
 
 
 ## Installation
