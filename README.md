@@ -10,7 +10,7 @@ All credit goes to them.
 
 
 [integration_librelink]: https://github.com/dodog/librelink.git
-[buymecoffee]: https://www.buymeacoffee.com/gillesvs
+[buymecoffee]: https://www.buymeacoffee.com/dodog
 
 **This integration will set up the following platforms for each patient linked to the librelinkUp account.**
 
@@ -29,7 +29,7 @@ Platform | Description
 
 ## Illustration with a custom:mini-graph-card
 
-![image](https://github.com/gillesvs/librelink/assets/51242147/bfed1b2b-dbf7-4666-a202-885ff3db67b8)
+![image](https://github.com/dodog/librelink/assets/51242147/bfed1b2b-dbf7-4666-a202-885ff3db67b8)
 
 And the yaml if you like this card:
 https://github.com/gillesvs/librelink/blob/main/custom_components/librelink/mini-graph-glucose.yml
@@ -56,4 +56,4 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 
 ***
 
-<a href="https://ko-fi.com/dodog" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+<a href="https://www.buymeacoffee.com/dodog" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
