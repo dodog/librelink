@@ -3,8 +3,6 @@
 [![Validate with Hassfest](https://github.com/dodog/librelink/actions/workflows/hassfest.yaml/badge.svg)](https://github.com/dodog/librelink/actions/workflows/hassfest.yaml)
 [![Validate with HACS](https://github.com/dodog/librelink/actions/workflows/validate.yaml/badge.svg)](https://github.com/dodog/librelink/actions/workflows/validate.yaml)
 
-Forked from [@gillesvs](https://github.com/gillesvs/librelink) and [@kubasaw](https://github.com/kubasaw/librelink).  
-All credit goes to them.
 
 # LibrelinkUp Integration for Home Assistant 
 
@@ -13,14 +11,18 @@ All credit goes to them.
 [buymecoffee]: https://www.buymeacoffee.com/dodog
 
 **This integration will set up the following platforms for each patient linked to the librelinkUp account.**
-
+- Enhanced Trend Calculation	More accurate than the sensor's native trend.	Better reflects true physiological changes by reducing noise.	Uses a weighted average of multiple time windows (1-min, 5-min, 15-min) and applies smoothing logic.
+  
 Platform | Description
 -- | --
 
 `sensor` | Show info from LibrelinkUp API.
 - Active Sensor (in days) : All information about your sensor. State is number of days since activation.
 - Glucose Measurement (in mg/dL) : Measured value every minute.
-- Glucose Trend : in plain text + icon.
+- Glucose Trend : Direction and speed of glucose change.	Calculates rate of change, then classifies it using clinical thresholds.
+- Trend Arrow : A visual arrow: ↗, →, ↘, ↓, ↑.
+- Rate of Change : Precise speed in mg/dL/min or mmol/L/min. 
+- Delta 1/5/15 Min : Absolute change over 1, 5, and 15 minutes in mmol/L or mg/dL.
 - Minutes since update (in min) : self explanatory.
 
 `binary_sensor` | to measure high and low.
@@ -57,3 +59,5 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 ***
 
 <a href="https://www.buymeacoffee.com/dodog" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+
+Forked from [@gillesvs](https://github.com/gillesvs/librelink) and [@kubasaw](https://github.com/kubasaw/librelink).  

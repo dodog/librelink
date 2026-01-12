@@ -7,7 +7,7 @@ LOGGER: Logger = getLogger(__package__)
 
 NAME: Final = "LibreLink"
 DOMAIN: Final = "librelink"
-VERSION: Final = "1.2.4"
+VERSION: Final = "1.3.1"
 ATTRIBUTION: Final = "Data provided by https://libreview.com"
 LOGIN_URL: Final = "/llu/auth/login"
 CONNECTION_URL: Final = "/llu/connections"
@@ -25,7 +25,7 @@ BASE_URL_LIST: Final = {
     "United States": "https://api-us.libreview.io",
 }
 PRODUCT: Final = "llu.android"
-VERSION_APP: Final = "4.16.0"
+VERSION_APP: Final = "4.17.0"
 GLUCOSE_VALUE_ICON: Final = "mdi:diabetes"
 GLUCOSE_TREND_ICON: Final = {
     1: "mdi:arrow-down-bold-box",
