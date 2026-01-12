@@ -3,7 +3,7 @@ name: Bug report
 about: Create a bug to help us improve
 title: 'Issue identified : '
 labels: ''
-assignees: gillesvs
+assignees: dodog
 
 ---
 
