@@ -7,8 +7,19 @@
         "description": "Dokumentácia: https://github.com/dodog/librelink",
         "data": {
           "username": "Email",
-          "password": "Heslo"
+          "password": "Heslo",
+          "Country": "Vyberte svoj región",
+          "unit_of_measurement": "Jednotka merania glykémie",
+          "url": "Región"
         }
+      },
+      "patient": {
+          "title": "Vyberte pacienta a jednotky",
+          "data": {
+              "patient_id": "Pacient",
+              "unit_of_measurement": "Jednotka merania"
+          },
+          "description": "Vyberte pacienta a preferovanú jednotku merania."
       }
     },
     "error": {
