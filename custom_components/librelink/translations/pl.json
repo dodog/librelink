@@ -19,7 +19,7 @@
               "identyfikator_pacjenta": "Pacjent",
               "jednostka_miary": "Jednostka miary"
           },
-          "opis": "Wybierz pacjenta i preferowaną jednostkę miary".
+          "opis": "Wybierz pacjenta i preferowaną jednostkę miary"
       }
     },
     "error": {
