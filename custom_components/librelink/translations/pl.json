@@ -10,16 +10,16 @@
           "password": "Hasło",
           "Country": "Wybierz swój region",
           "unit_of_measurement": "Jednostka pomiaru glukozy",
-          "url": "Region/URL"
+          "url": "Region"
         }
       },
-      "pacjent": {
-          "tytuł": "Wybierz pacjenta i jednostkę",
-          "dane": {
-              "identyfikator_pacjenta": "Pacjent",
-              "jednostka_miary": "Jednostka miary"
+      "patient": {
+          "title": "Wybierz pacjenta i jednostkę",
+          "data": {
+              "patient_id": "Pacjent",
+              "unit_of_measurement": "Jednostka miary"
           },
-          "opis": "Wybierz pacjenta i preferowaną jednostkę miary"
+          "description": "Wybierz pacjenta i preferowaną jednostkę miary"
       }
     },
     "error": {
