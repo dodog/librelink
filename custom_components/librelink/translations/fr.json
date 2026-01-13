@@ -7,7 +7,7 @@
         "description": "Documentation: https://github.com/dodog/librelink",
         "data": {
           "username": "Mail utilisateur",
-          "password": "Mot de passe"
+          "password": "Mot de passe",
           "Country": "Sélectionnez votre région",
           "unit_of_measurement": "Unité de mesure du glucose",
           "url": "Région"
