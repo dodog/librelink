@@ -7,8 +7,19 @@
         "description": "Documentation: https://github.com/dodog/librelink",
         "data": {
           "username": "Mail",
-          "password": "Password"
+          "password": "Password",
+          "Country": "Select your region",
+          "unit_of_measurement": "Unit for glucose measurement",
+          "url": "Region/URL"
         }
+      },
+      "patient": {
+          "title": "Select Patient and Unit",
+          "data": {
+              "patient_id": "Patient",
+              "unit_of_measurement": "Unit of Measurement"
+          },
+          "description": "Select the patient and preferred unit of measurement."
       }
     },
     "error": {
