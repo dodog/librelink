@@ -1,19 +1,34 @@
 {
+  "title": "LibreLink Intégration",
   "config": {
     "step": {
       "user": {
-        "title": "Enter your mail and password",
+        "title": "Entrez votre adresse e-mail et votre mot de passe",
         "description": "Documentation: https://github.com/dodog/librelink",
         "data": {
           "username": "Mail utilisateur",
           "password": "Mot de passe"
+          "Country": "Sélectionnez votre région",
+          "unit_of_measurement": "Unité de mesure du glucose",
+          "url": "Région"
         }
+      },
+      "patient": {
+          "title": "Sélectionnez le patient et l'unité",
+          "data": {
+              "patient_id": "Patient",
+              "unit_of_measurement": "Unité de mesure"
+          },
+          "description": "Sélectionnez le patient et l'unité de mesure souhaitée."
       }
     },
     "error": {
-      "auth": "Username/Password is wrong.",
-      "connection": "Unable to connect to the server.",
-      "unknown": "Unknown error occurred."
+      "auth": "Nom d'utilisateur/mot de passe incorrect.",
+      "connection": "Impossible de se connecter au serveur.",
+      "unknown": "Une erreur inconnue s'est produite."
+    },
+    "abort": {
+      "already_configured": " L'appareil est déjà configuré"
     }
   }
 }
