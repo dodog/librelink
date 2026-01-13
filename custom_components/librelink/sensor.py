@@ -131,7 +131,7 @@ class TrendSensor(LibreLinkSensor):
     @property
     def name(self):
         """Return the name of the sensor."""
-        return "Glucose Trend"
+        return "Trend"
 
     @property
     def native_value(self):
@@ -177,6 +177,30 @@ class TrendSensor(LibreLinkSensor):
                 return result
 
         return "Unknown"
+
+    @property
+    def icon(self):
+        """Return the icon for the frontend based on enhanced trend calculation."""
+        # Use trend calculator data for icon, not the original trend icon
+        if self._calculated_trend:
+            trend_category = self._calculated_trend.get("trend", "UNKNOWN").upper()
+            
+            # Map the trend calculator categories to Material Design Icons
+            # This matches what trend_calculator._trend_to_arrow() returns
+            icon_mapping = {
+                "FALLING_FAST": "mdi:arrow-down-bold",      # ↓
+                "FALLING": "mdi:arrow-bottom-right",        # ↘
+                "STABLE": "mdi:arrow-right",                # →
+                "RISING": "mdi:arrow-top-right",            # ↗
+                "RISING_FAST": "mdi:arrow-up-bold",         # ↑
+                "STALE_DATA": "mdi:clock-alert-outline",    # Clock with alert for stale data
+                "UNKNOWN": "mdi:help-circle-outline",       # Question mark for unknown
+            }
+            
+            return icon_mapping.get(trend_category, "mdi:help-circle-outline")
+        
+        # Fallback if calculation hasn't run yet
+        return "mdi:help-circle-outline"
 
     @property
     def extra_state_attributes(self):
@@ -537,6 +561,30 @@ class TrendArrowSensor(LibreLinkSensor):
         return "→"  # Default arrow
 
     @property
+    def icon(self):
+        """Return the icon for the frontend based on enhanced trend calculation."""
+        # Use trend calculator data for icon, not the original GLUCOSE_TREND_ICON
+        if self._calculated_trend:
+            trend_category = self._calculated_trend.get("trend", "UNKNOWN").upper()
+            
+            # Map the trend calculator categories to Material Design Icons
+            # This matches what trend_calculator._trend_to_arrow() returns
+            icon_mapping = {
+                "FALLING_FAST": "mdi:arrow-down-bold",      # ↓
+                "FALLING": "mdi:arrow-bottom-right",                # ↘
+                "STABLE": "mdi:arrow-right",                # →
+                "RISING": "mdi:arrow-top-right",                   # ↗
+                "RISING_FAST": "mdi:arrow-up-bold",         # ↑
+                "STALE_DATA": "mdi:clock-alert-outline",    # Clock with alert for stale data
+                "UNKNOWN": "mdi:help-circle-outline",       # Question mark for unknown
+            }
+            
+            return icon_mapping.get(trend_category, "mdi:help-circle-outline")
+        
+        # Fallback if calculation hasn't run yet
+        return "mdi:help-circle-outline"
+
+    @property
     def extra_state_attributes(self):
         """Return the state attributes."""
         attrs = super().extra_state_attributes
@@ -556,7 +604,7 @@ class TrendArrowSensor(LibreLinkSensor):
         # The actual calculation happens in native_value property
         pass
 
-class MeasurementSensor(TrendSensor, LibreLinkSensor):
+class MeasurementSensor(LibreLinkSensor):
     """Glucose Measurement Sensor class."""
 
     def __init__(
@@ -568,6 +616,7 @@ class MeasurementSensor(TrendSensor, LibreLinkSensor):
         """Initialize the sensor class."""
         super().__init__(coordinator, pid)
         self.unit = unit
+        self._calculated_trend = None  # Add this for enhanced trend
 
     @property
     def state_class(self):
@@ -593,6 +642,53 @@ class MeasurementSensor(TrendSensor, LibreLinkSensor):
     def unit_of_measurement(self):
         """Return the unit of measurement of the sensor."""
         return self.unit.unit_of_measurement
+
+    @property
+    def icon(self):
+        """Return the icon for the frontend."""
+        # Get trend info from calculator (same as EnhancedTrendSensor)
+        try:
+            if hasattr(self.coordinator, 'trend_calculator') and self.coordinator.trend_calculator:
+                if self._data.measurement and self._data.measurement.value:
+                    # Convert timestamp to string for trend calculator
+                    timestamp = self._data.measurement.timestamp
+                    if hasattr(timestamp, 'isoformat'):
+                        timestamp_str = timestamp.isoformat()
+                    else:
+                        timestamp_str = str(timestamp)
+                    
+                    measurement_data = {
+                        "Timestamp": timestamp_str,
+                        "Value": self._data.measurement.value,
+                        "TrendArrow": self._data.measurement.trend
+                    }
+                    
+                    self.coordinator.trend_calculator.add_measurement(measurement_data)
+                    trend_info = self.coordinator.trend_calculator.calculate_trend()
+                    self._calculated_trend = trend_info
+                    
+                    # Use enhanced trend icon mapping
+                    trend_category = trend_info.get("trend", "UNKNOWN").upper()
+                    icon_mapping = {
+                        "FALLING_FAST": "mdi:arrow-down-bold",
+                        "FALLING": "mdi:arrow-bottom-right",
+                        "STABLE": "mdi:arrow-right",
+                        "RISING": "mdi:arrow-top-right",
+                        "RISING_FAST": "mdi:arrow-up-bold",
+                        "STALE_DATA": "mdi:clock-alert-outline",
+                        "UNKNOWN": "mdi:help-circle-outline",
+                    }
+                    
+                    return icon_mapping.get(trend_category, "mdi:help-circle-outline")
+        except Exception as e:
+            _LOGGER.debug("Enhanced icon calculation failed for MeasurementSensor: %s", e)
+        
+        # Fallback to original trend icon
+        if measurement := self._data.measurement:
+            if trend := measurement.trend:
+                return GLUCOSE_TREND_ICON.get(trend, GLUCOSE_VALUE_ICON)
+        
+        return GLUCOSE_VALUE_ICON
 
 class TimestampSensor(LibreLinkSensor):
     """Timestamp Sensor class."""
