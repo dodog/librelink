@@ -7,7 +7,7 @@ LOGGER: Logger = getLogger(__package__)
 
 NAME: Final = "LibreLink"
 DOMAIN: Final = "librelink"
-VERSION: Final = "1.3.1"
+VERSION: Final = "1.3.2"
 ATTRIBUTION: Final = "Data provided by https://libreview.com"
 LOGIN_URL: Final = "/llu/auth/login"
 CONNECTION_URL: Final = "/llu/connections"
