@@ -14,12 +14,12 @@
         }
       },
       "patient": {
-          "title": "Sélectionnez le patient et l'unité",
-          "data": {
-              "patient_id": "Patient",
-              "unit_of_measurement": "Unité de mesure"
-          },
-          "description": "Sélectionnez le patient et l'unité de mesure souhaitée."
+        "title": "Sélectionnez le patient et l'unité",
+        "data": {
+          "patient_id": "Patient",
+          "unit_of_measurement": "Unité de mesure"
+        },
+        "description": "Sélectionnez le patient et l'unité de mesure souhaitée."
       }
     },
     "error": {
