@@ -1,0 +1,34 @@
+{
+  "title": "LibreLink Integration",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Geben Sie Ihre E-Mail und Ihr Passwort ein",
+        "description": "Dokumentation: https://github.com/dodog/librelink",
+        "data": {
+          "username": "E-Mail",
+          "password": "Passwort",
+          "Country": "Wählen Sie Ihre Region",
+          "unit_of_measurement": "Einheit für Glukosemessung",
+          "url": "Region/URL"
+        }
+      },
+      "patient": {
+        "title": "Patient und Einheit auswählen",
+        "data": {
+          "patient_id": "Patient",
+          "unit_of_measurement": "Maßeinheit"
+        },
+        "description": "Wählen Sie den Patienten und die bevorzugte Maßeinheit aus."
+      }
+    },
+    "error": {
+      "auth": "Benutzername/Passwort ist falsch.",
+      "connection": "Verbindung zum Server konnte nicht hergestellt werden.",
+      "unknown": "Ein unbekannter Fehler ist aufgetreten."
+    },
+    "abort": {
+      "already_configured": "Gerät ist bereits konfiguriert"
+    }
+  }
+}
