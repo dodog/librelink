@@ -28,7 +28,7 @@
       "unknown": "Une erreur inconnue s'est produite."
     },
     "abort": {
-      "already_configured": " L'appareil est déjà configuré"
+      "already_configured": "L'appareil est déjà configuré"
     }
   }
 }
