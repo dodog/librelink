@@ -7,5 +7,5 @@
   "documentation": "https://github.com/dodog/librelink",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/dodog/librelink/issues",
-  "version": "1.3.2"
+  "version": "1.3.3"
 }
