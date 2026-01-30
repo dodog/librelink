@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Zadajte svoj email a heslo",
-        "description": "Dokumentácia: https://github.com/dodog/librelink",
+        "description": "Dokumentácia: {documentation_url}",
         "data": {
           "username": "Email",
           "password": "Heslo",

@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Wprowadź swój adres e-mail i hasło do konta LibreLink.",
-        "description": "Dokumentacja: https://github.com/dodog/librelink",
+        "description": "Dokumentacja: {documentation_url}",
         "data": {
           "username": "Email",
           "password": "Hasło",
