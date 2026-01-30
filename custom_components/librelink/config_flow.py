@@ -94,6 +94,9 @@ class LibreLinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 }
             ),
             errors=_errors,
+            description_placeholders={
+                "documentation_url": "https://github.com/dodog/librelink"
+            },
         )
 
     async def async_step_patient(self, user_input=None):
