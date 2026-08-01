@@ -1,34 +1,37 @@
 {
-  "title": "LibreLink integration",
-  "config": {
-    "step": {
-      "user": {
-        "title": "Enter your mail and password",
-        "description": "Documentation: {documentation_url}",
-        "data": {
-          "username": "Mail",
-          "password": "Password",
-          "Country": "Select your region",
-          "unit_of_measurement": "Unit for glucose measurement",
-          "url": "Region/URL"
+    "title": "LibreLink integration",
+    "sensor": {
+        "time_in_range_24h": "Time In Range (24h)"
+    },
+    "config": {
+        "step": {
+            "user": {
+                "title": "Enter your mail and password",
+                "description": "Documentation: {documentation_url}",
+                "data": {
+                    "username": "Mail",
+                    "password": "Password",
+                    "Country": "Select your region",
+                    "unit_of_measurement": "Unit for glucose measurement",
+                    "url": "Region/URL"
+                }
+            },
+            "patient": {
+                "title": "Select Patient and Unit",
+                "data": {
+                    "patient_id": "Patient",
+                    "unit_of_measurement": "Unit of Measurement"
+                },
+                "description": "Select the patient and preferred unit of measurement."
+            }
+        },
+        "error": {
+            "auth": "Username/Password is wrong.",
+            "connection": "Unable to connect to the server.",
+            "unknown": "Unknown error occurred."
+        },
+        "abort": {
+            "already_configured": "Device is already configured"
         }
-      },
-      "patient": {
-          "title": "Select Patient and Unit",
-          "data": {
-              "patient_id": "Patient",
-              "unit_of_measurement": "Unit of Measurement"
-          },
-          "description": "Select the patient and preferred unit of measurement."
-      }
-    },
-    "error": {
-      "auth": "Username/Password is wrong.",
-      "connection": "Unable to connect to the server.",
-      "unknown": "Unknown error occurred."
-    },
-    "abort": {
-      "already_configured": "Device is already configured"
     }
-  }
 }
