@@ -1,34 +1,37 @@
 {
-  "title": "Integracja LibreLink",
-  "config": {
-    "step": {
-      "user": {
-        "title": "Wprowadź swój adres e-mail i hasło do konta LibreLink.",
-        "description": "Dokumentacja: {documentation_url}",
-        "data": {
-          "username": "Email",
-          "password": "Hasło",
-          "Country": "Wybierz swój region",
-          "unit_of_measurement": "Jednostka pomiaru glukozy",
-          "url": "Region"
+    "title": "Integracja LibreLink",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Wprowadź swój adres e-mail i hasło do konta LibreLink.",
+                "description": "Dokumentacja: {documentation_url}",
+                "data": {
+                    "username": "Email",
+                    "password": "Hasło",
+                    "Country": "Wybierz swój region",
+                    "unit_of_measurement": "Jednostka pomiaru glukozy",
+                    "url": "Region"
+                }
+            },
+            "patient": {
+                "title": "Wybierz pacjenta i jednostkę",
+                "data": {
+                    "patient_id": "Pacjent",
+                    "unit_of_measurement": "Jednostka miary"
+                },
+                "description": "Wybierz pacjenta i preferowaną jednostkę miary"
+            }
+        },
+        "error": {
+            "auth": "Nieprawidłowa nazwa użytkownika/hasło",
+            "connection": "Nie można połączyć się z serwerem",
+            "unknown": "Wystąpił nieznany błąd"
+        },
+        "abort": {
+            "already_configured": "Urządzenie jest już skonfigurowane"
         }
-      },
-      "patient": {
-          "title": "Wybierz pacjenta i jednostkę",
-          "data": {
-              "patient_id": "Pacjent",
-              "unit_of_measurement": "Jednostka miary"
-          },
-          "description": "Wybierz pacjenta i preferowaną jednostkę miary"
-      }
     },
-    "error": {
-      "auth": "Nieprawidłowa nazwa użytkownika/hasło",
-      "connection": "Nie można połączyć się z serwerem",
-      "unknown": "Wystąpił nieznany błąd"
-    },
-    "abort": {
-      "already_configured": "Urządzenie jest już skonfigurowane"
+    "sensor": {
+        "time_in_range_24h": "Time In Range (24h)"
     }
-  }
 }
