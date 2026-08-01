@@ -31,7 +31,4 @@
             "already_configured": "L'appareil est déjà configuré"
         }
     }
-    "sensor": {
-        "time_in_range_24h": "Time In Range (24h)"
-    }
-}
+} 

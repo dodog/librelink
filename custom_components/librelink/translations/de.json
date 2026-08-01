@@ -1,8 +1,5 @@
 {
     "title": "LibreLink Integration",
-    "sensor": {
-        "time_in_range_24h": "Time In Range (24h)"
-    },
     "config": {
         "step": {
             "user": {

@@ -30,8 +30,5 @@
         "abort": {
             "already_configured": "Zariadenie je už nastavené"
         }
-    },
-    "sensor": {
-        "time_in_range_24h": "Time In Range (24h)"
     }
-}
+} 
