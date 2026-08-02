@@ -21,10 +21,8 @@ from .const import (
 SENSOR_DEFAULT_LIFESPAN_DAYS = 14
 SENSOR_PLUS_LIFESPAN_DAYS = 15
 SENSOR_LIFESPAN_DAYS = {
-    # Add known sensor product type codes for 15-day sensors here.
-    # Example:
-    # "L2P": SENSOR_PLUS_LIFESPAN_DAYS,
-    # "L3P": SENSOR_PLUS_LIFESPAN_DAYS,
+    "3": SENSOR_DEFAULT_LIFESPAN_DAYS,  # Libre 2 & Libre 3 standard (14 days)
+    "4": SENSOR_PLUS_LIFESPAN_DAYS,      # Libre 2 Plus & Libre 3 Plus (15 days)
 }
 
 
