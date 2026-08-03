@@ -797,6 +797,9 @@ class ApplicationTimestampSensor(TimestampSensor):
             attrs.update({
                 "Serial number": self._data.device.serial_number,
                 "Activation date": self._data.device.application_timestamp,
+                "Sensor product type": self._data.device.product_type,
+                "Sensor lifespan days": self._data.device.sensor_lifespan,
+                "Sensor plus model": self._data.device.is_plus_sensor,
             })
         return attrs
 
