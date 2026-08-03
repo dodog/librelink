@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
+
+from homeassistant.components.recorder import get_instance, history as recorder_history
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -10,10 +13,12 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_UNIT_OF_MEASUREMENT, CONF_USERNAME
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity import EntityCategory
+import homeassistant.util.dt as dt_util
 
 from .const import (
     ATTRIBUTION,
@@ -698,6 +703,85 @@ class TimeInRangeSensor(LibreLinkSensor):
     def __init__(self, coordinator, patient_id, unit: UnitOfMeasurement):
         super().__init__(coordinator, patient_id)
         self.unit = unit
+
+    async def async_added_to_hass(self):
+        """Rebuild the 24h buffer from HA's recorder so a restart doesn't lose TIR history."""
+        await super().async_added_to_hass()
+        try:
+            await self._async_seed_from_recorder()
+        except Exception as e:
+            # Never let a recorder hiccup block sensor setup - TIR will just
+            # rebuild live over the next 24h instead.
+            _LOGGER.debug(
+                "Could not seed Time In Range history from recorder for patient %s: %s",
+                self.id, e
+            )
+
+    async def _async_seed_from_recorder(self):
+        """Pull the last 24h of the Measurement sensor's recorded states.
+
+        This lets Time In Range survive a Home Assistant restart / integration
+        reload, instead of starting from an empty in-memory buffer. Recorder
+        data is merged with anything the coordinator has already polled live
+        since startup, rather than overwriting it.
+        """
+        registry = er.async_get(self.hass)
+        measurement_unique_id = f"{self.id} Measurement".replace(" ", "_").lower()
+        entity_id = registry.async_get_entity_id("sensor", DOMAIN, measurement_unique_id)
+
+        if entity_id is None:
+            _LOGGER.debug(
+                "No recorded Measurement entity found yet for patient %s; "
+                "Time In Range will rebuild live over the next 24h",
+                self.id,
+            )
+            return
+
+        start_time = dt_util.utcnow() - timedelta(hours=24)
+
+        states_by_entity = await get_instance(self.hass).async_add_executor_job(
+            recorder_history.state_changes_during_period,
+            self.hass,
+            start_time,
+            None,
+            entity_id,
+        )
+
+        recovered = []
+        for state in states_by_entity.get(entity_id, []):
+            if state.state in (None, "unknown", "unavailable"):
+                continue
+            try:
+                displayed_value = float(state.state)
+            except (ValueError, TypeError):
+                continue
+            # Recorder stores whatever unit was selected/displayed; convert
+            # back to mg/dL to match target.low/high and history_24h.
+            value_mgdl = self.unit.to_mg_per_dl(displayed_value)
+            recovered.append({"timestamp": state.last_changed, "value": value_mgdl})
+
+        if not recovered:
+            return
+
+        recovered.sort(key=lambda m: m["timestamp"])
+
+        existing = self.coordinator.history_24h.get(self.id, [])
+        if existing:
+            # Keep recorder entries only where they don't overlap what's
+            # already been polled live since this reload/restart.
+            earliest_live = existing[0]["timestamp"]
+            recovered = [m for m in recovered if m["timestamp"] < earliest_live]
+
+        merged = recovered + existing
+        cutoff = dt_util.utcnow() - timedelta(hours=24)
+        merged = [m for m in merged if m["timestamp"] > cutoff]
+
+        self.coordinator.history_24h[self.id] = merged
+        _LOGGER.info(
+            "Seeded Time In Range history for patient %s with %d measurements from recorder "
+            "(now covering %d total)",
+            self.id, len(recovered), len(merged)
+        )
 
     @property
     def name(self):
