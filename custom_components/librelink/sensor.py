@@ -31,7 +31,7 @@ from .const import (
     VERSION,
 )
 from .coordinator import LibreLinkDataUpdateCoordinator
-from .units import UNITS_OF_MEASUREMENT, UnitOfMeasurement
+from .units import UNITS_OF_MEASUREMENT, UnitOfMeasurement, mgdl_to_mmoll
 
 import logging
 
@@ -107,6 +107,20 @@ class LibreLinkSensorBase(CoordinatorEntity[LibreLinkDataUpdateCoordinator]):
         return self.coordinator.data[self.id]
 
     @property
+    def _trend_info(self) -> dict:
+        """Return this patient's cached trend result.
+
+        Computed once per coordinator poll (see coordinator._async_update_data)
+        rather than here, so multiple property reads per poll (icon, state,
+        attributes) don't each recompute - or re-log staleness - separately.
+        """
+        return self.coordinator.trend_results.get(self.id) or {}
+
+    def _delta_info(self, window: str) -> dict:
+        """Return this patient's cached delta result for a given window (1min/5min/15min)."""
+        return self.coordinator.delta_results.get(self.id, {}).get(window, {})
+
+    @property
     def unique_id(self):
         """Return the unique id of the sensor."""
         return f"{self._data.id} {self.name}".replace(" ", "_").lower()
@@ -133,7 +147,6 @@ class TrendSensor(LibreLinkSensor):
         """Initialize the sensor."""
         super().__init__(coordinator, patient_id)
         self._attr_icon = "mdi:trending-up"
-        self._calculated_trend = None
 
     @property
     def name(self):
@@ -143,91 +156,55 @@ class TrendSensor(LibreLinkSensor):
     @property
     def native_value(self):
         """Return the state of the sensor."""
-        try:
-            if hasattr(self.coordinator, 'trend_calculator') and self.coordinator.trend_calculator:
-                
-                if self._data.measurement and self._data.measurement.value:
-                    # Convert timestamp to string for trend calculator
-                    timestamp = self._data.measurement.timestamp
-                    if hasattr(timestamp, 'isoformat'):
-                        timestamp_str = timestamp.isoformat()
-                    else:
-                        timestamp_str = str(timestamp)
-                    
-                    measurement_data = {
-                        "Timestamp": timestamp_str,
-                        "Value": self._data.measurement.value,
-                        "TrendArrow": self._data.measurement.trend
-                    }
-                    
-                    self.coordinator.trend_calculator.add_measurement(measurement_data)
-                    trend_info = self.coordinator.trend_calculator.calculate_trend()
-                    self._calculated_trend = trend_info
-                    
-                    _LOGGER.debug("Calculated trend info: %s", trend_info)
-                    
-                    if trend_info.get("calculated", False):
-                        result = trend_info["description"]
-                        return result
-                    else:
-                        # Even if not calculated, the calculator might have a fallback
-                        result = trend_info.get("description", "Unknown")
-                        return result
-        except Exception as e:
-            _LOGGER.error("Enhanced trend calculation failed: %s", e, exc_info=True)
-            # Fall through to server trend
-        
-        # FALLBACK: Use server trend only if enhanced calculation failed
+        trend_info = self._trend_info
+        if trend_info:
+            return trend_info.get("description", "Unknown")
+
+        # No cached trend yet (e.g. right after startup, before the
+        # coordinator's first poll populates it) - fall back to the
+        # server-provided trend arrow.
         if measurement := self._data.measurement:
             if trend := measurement.trend:
-                result = self._convert_trend(trend)
-                return result
+                return self._convert_trend(trend)
 
         return "Unknown"
 
     @property
     def icon(self):
         """Return the icon for the frontend based on enhanced trend calculation."""
-        # Use trend calculator data for icon, not the original trend icon
-        if self._calculated_trend:
-            trend_category = self._calculated_trend.get("trend", "UNKNOWN").upper()
-            
-            # Map the trend calculator categories to Material Design Icons
-            # This matches what trend_calculator._trend_to_arrow() returns
-            icon_mapping = {
-                "FALLING_FAST": "mdi:arrow-down-bold",      # ↓
-                "FALLING": "mdi:arrow-bottom-right",        # ↘
-                "STABLE": "mdi:arrow-right",                # →
-                "RISING": "mdi:arrow-top-right",            # ↗
-                "RISING_FAST": "mdi:arrow-up-bold",         # ↑
-                "STALE_DATA": "mdi:clock-alert-outline",    # Clock with alert for stale data
-                "UNKNOWN": "mdi:help-circle-outline",       # Question mark for unknown
-            }
-            
-            return icon_mapping.get(trend_category, "mdi:help-circle-outline")
-        
-        # Fallback if calculation hasn't run yet
-        return "mdi:help-circle-outline"
+        trend_category = self._trend_info.get("trend", "UNKNOWN").upper()
+
+        # Map the trend calculator categories to Material Design Icons
+        icon_mapping = {
+            "FALLING_FAST": "mdi:arrow-down-bold",      # ↓
+            "FALLING": "mdi:arrow-bottom-right",        # ↘
+            "STABLE": "mdi:arrow-right",                # →
+            "RISING": "mdi:arrow-top-right",            # ↗
+            "RISING_FAST": "mdi:arrow-up-bold",         # ↑
+            "STALE_DATA": "mdi:clock-alert-outline",    # Clock with alert for stale data
+            "UNKNOWN": "mdi:help-circle-outline",       # Question mark for unknown
+        }
+
+        return icon_mapping.get(trend_category, "mdi:help-circle-outline")
 
     @property
     def extra_state_attributes(self):
         """Return the state attributes."""
-        # Start with parent attributes
         attrs = super().extra_state_attributes
-        
-        # Add enhanced info if available
-        if self._calculated_trend:
+
+        trend_info = self._trend_info
+        if trend_info:
             attrs.update({
-                "trend_calculated": self._calculated_trend.get("calculated", False),
-                "trend_rate_mgdl_per_min": round(self._calculated_trend.get("rate", 0.0), 4),
-                "trend_rate_mmoll_per_min": round(self._calculated_trend.get("rate", 0.0) * 0.0555, 4),
-                "trend_arrow": self._calculated_trend.get("arrow", "→"),
-                "trend_category": self._calculated_trend.get("trend", "UNKNOWN"),
-                "history_count": self._calculated_trend.get("history_count", 0),
-                "data_is_fresh": self._calculated_trend.get("data_is_fresh", False),
-                "minutes_since_last": round(self._calculated_trend.get("minutes_since_last", 999), 1)
+                "trend_calculated": trend_info.get("calculated", False),
+                "trend_rate_mgdl_per_min": round(trend_info.get("rate", 0.0), 4),
+                "trend_rate_mmoll_per_min": round(mgdl_to_mmoll(trend_info.get("rate", 0.0)), 4),
+                "trend_arrow": trend_info.get("arrow", "→"),
+                "trend_category": trend_info.get("trend", "UNKNOWN"),
+                "history_count": trend_info.get("history_count", 0),
+                "data_is_fresh": trend_info.get("data_is_fresh", False),
+                "minutes_since_last": round(trend_info.get("minutes_since_last", 999), 1)
             })
-        
+
         return attrs
 
     def _convert_trend(self, trend):
@@ -268,7 +245,6 @@ class RateOfChangeSensor(LibreLinkSensor):
         super().__init__(coordinator, patient_id)
         self._attr_icon = "mdi:speedometer"
         self.unit = unit  # Store the selected unit
-        self._calculated_trend = None
 
     @property
     def name(self):
@@ -285,218 +261,92 @@ class RateOfChangeSensor(LibreLinkSensor):
     @property
     def native_value(self):
         """Return the state of the sensor."""
-        if hasattr(self.coordinator, 'trend_calculator') and self.coordinator.trend_calculator:
-            trend_info = self.coordinator.trend_calculator.calculate_trend()
-            self._calculated_trend = trend_info
-            rate = trend_info.get("rate", 0.0)
-            
-            # Check for the special "stale data" trend
-            if trend_info.get("trend") == "STALE_DATA":
-                # Return None or a special value. Home Assistant will show "Unavailable"
-                return None
-            
-            # Convert rate based on selected unit
-            if self.unit.unit_of_measurement == "mmol/L":
-                converted_rate = rate * 0.0555
-                return round(converted_rate, 2)
-            
-            return round(rate, 2)
-        
-        return None
+        trend_info = self._trend_info
+
+        # No cached trend yet, or data is stale - Home Assistant shows "Unavailable".
+        if not trend_info or trend_info.get("trend") == "STALE_DATA":
+            return None
+
+        rate = trend_info.get("rate", 0.0)
+        return round(self.unit.from_mg_per_dl(rate), 2)
 
     @property
     def extra_state_attributes(self):
         """Return the state attributes."""
-        # Start with parent attributes
         attrs = super().extra_state_attributes
-        
-        # Only add trend info if we have calculated trend data
-        if self._calculated_trend is not None:
+
+        trend_info = self._trend_info
+        if trend_info:
             attrs.update({
-                "trend_category": self._calculated_trend.get("trend"),
-                "trend_description": self._calculated_trend.get("description"),
-                "trend_arrow": self._calculated_trend.get("arrow"),
-                "history_count": self._calculated_trend.get("history_count")
+                "trend_category": trend_info.get("trend"),
+                "trend_description": trend_info.get("description"),
+                "trend_arrow": trend_info.get("arrow"),
+                "history_count": trend_info.get("history_count")
             })
-        
+
         return attrs
 
 # Delta for 1min, 5min, 15min
 class Delta1MinSensor(RateOfChangeSensor):
-    """1-minute Delta sensor."""
+    """N-minute Delta sensor base class.
 
-    def __init__(self, coordinator, patient_id, unit):
-        """Initialize the sensor."""
-        super().__init__(coordinator, patient_id, unit)
+    Subclasses only need to override `_window`/`_label` - see
+    Delta5MinSensor/Delta15MinSensor below.
+    """
+
+    _window = "1min"
+    _label = "Delta 1min"
 
     @property
     def name(self):
         """Return the name of the sensor."""
-        return "Delta 1min"
+        return self._label
 
     @property
     def native_unit_of_measurement(self):
         """Return the unit of measurement."""
-        return self.unit.unit_of_measurement  
+        return self.unit.unit_of_measurement
 
     @property
     def native_value(self):
         """Return the state of the sensor."""
-        if hasattr(self.coordinator, 'trend_calculator') and self.coordinator.trend_calculator:
-            # 1. Check the main trend result for stale data
-            trend_info = self.coordinator.trend_calculator.calculate_trend()
-            if trend_info.get("trend") == "STALE_DATA":
-                return None
-            
-            # 2. Get the specific delta result
-            delta_result = self.coordinator.trend_calculator.calculate_delta_1min()
-            
-            # 3. Check if a suitable measurement was actually found for the 1-min window
-            if not delta_result.get("found", False):
-                return None
-            
-            delta_mgdl = delta_result.get("delta_value", 0.0)
-            
-            # Convert to selected unit
-            if self.unit.unit_of_measurement == "mmol/L":
-                delta = delta_mgdl * 0.0555
-            else:
-                delta = delta_mgdl
-            
-            return round(delta, 2)
-        
-        return None
+        trend_info = self._trend_info
+        if not trend_info or trend_info.get("trend") == "STALE_DATA":
+            return None
+
+        delta_result = self._delta_info(self._window)
+        if not delta_result.get("found", False):
+            return None
+
+        delta_mgdl = delta_result.get("delta_value", 0.0)
+        return round(self.unit.from_mg_per_dl(delta_mgdl), 2)
 
     @property
     def extra_state_attributes(self):
         """Return the state attributes."""
-        # Start with parent attributes
         attrs = super().extra_state_attributes
-        
-        if hasattr(self.coordinator, 'trend_calculator') and self.coordinator.trend_calculator:
-            result = self.coordinator.trend_calculator.calculate_delta_1min()
-            attrs.update({
-                "delta_raw_mgdl": round(result.get("delta_value", 0.0), 2),
-                "time_window_min": round(result.get("time_diff", 0.0), 2),
-                "measurement_found": result.get("found", False),
-                "note": result.get("note", "")
-            })
-        
+
+        result = self._delta_info(self._window)
+        attrs.update({
+            "delta_raw_mgdl": round(result.get("delta_value", 0.0), 2),
+            "time_window_min": round(result.get("time_diff", 0.0), 2),
+            "measurement_found": result.get("found", False),
+            "note": result.get("note", "")
+        })
+
         return attrs
 
 class Delta5MinSensor(Delta1MinSensor):
     """5-minute Delta sensor."""
 
-    @property
-    def name(self):
-        """Return the name of the sensor."""
-        return "Delta 5min"
-    
-    @property
-    def native_unit_of_measurement(self):
-        return self.unit.unit_of_measurement  
-
-    @property
-    def native_value(self):
-        """Return the state of the sensor."""
-        if hasattr(self.coordinator, 'trend_calculator') and self.coordinator.trend_calculator:
-            # 1. Check the main trend result for stale data
-            trend_info = self.coordinator.trend_calculator.calculate_trend()
-            if trend_info.get("trend") == "STALE_DATA":
-                return None
-            
-            # 2. Get the specific delta result
-            delta_result = self.coordinator.trend_calculator.calculate_delta_5min()
-            
-            # 3. Check if a suitable measurement was actually found for the 5-min window
-            if not delta_result.get("found", False):
-                return None
-            
-            delta_mgdl = delta_result.get("delta_value", 0.0)
-            
-            # Convert to selected unit
-            if self.unit.unit_of_measurement == "mmol/L":
-                delta = delta_mgdl * 0.0555
-            else:
-                delta = delta_mgdl
-            
-            return round(delta, 2)
-        
-        return None
-
-    @property
-    def extra_state_attributes(self):
-        """Return the state attributes."""
-        # Start with parent attributes
-        attrs = super().extra_state_attributes
-        
-        if hasattr(self.coordinator, 'trend_calculator') and self.coordinator.trend_calculator:
-            result = self.coordinator.trend_calculator.calculate_delta_5min()
-            attrs.update({
-                "delta_raw_mgdl": round(result.get("delta_value", 0.0), 2),
-                "time_window_min": round(result.get("time_diff", 0.0), 2),
-                "measurement_found": result.get("found", False),
-                "note": result.get("note", "")
-            })
-        
-        return attrs
+    _window = "5min"
+    _label = "Delta 5min"
 
 class Delta15MinSensor(Delta1MinSensor):
     """15-minute Delta sensor."""
 
-    @property
-    def name(self):
-        """Return the name of the sensor."""
-        return "Delta 15min"
-
-    @property
-    def native_unit_of_measurement(self):
-        return self.unit.unit_of_measurement  
-
-    @property
-    def native_value(self):
-        """Return the state of the sensor."""
-        if hasattr(self.coordinator, 'trend_calculator') and self.coordinator.trend_calculator:
-            # 1. Check the main trend result for stale data
-            trend_info = self.coordinator.trend_calculator.calculate_trend()
-            if trend_info.get("trend") == "STALE_DATA":
-                return None
-            
-            # 2. Get the specific delta result
-            delta_result = self.coordinator.trend_calculator.calculate_delta_15min()
-            
-            # 3. Check if a suitable measurement was actually found for the 15-min window
-            if not delta_result.get("found", False):
-                return None
-            
-            delta_mgdl = delta_result.get("delta_value", 0.0)
-            
-            # Convert to selected unit
-            if self.unit.unit_of_measurement == "mmol/L":
-                delta = delta_mgdl * 0.0555
-            else:
-                delta = delta_mgdl
-            
-            return round(delta, 2)
-        
-        return None
-
-    @property
-    def extra_state_attributes(self):
-        """Return the state attributes."""
-        # Start with parent attributes
-        attrs = super().extra_state_attributes
-        
-        if hasattr(self.coordinator, 'trend_calculator') and self.coordinator.trend_calculator:
-            result = self.coordinator.trend_calculator.calculate_delta_15min()
-            attrs.update({
-                "delta_raw_mgdl": round(result.get("delta_value", 0.0), 2),
-                "time_window_min": round(result.get("time_diff", 0.0), 2),
-                "measurement_found": result.get("found", False),
-                "note": result.get("note", "")
-            })
-        
-        return attrs
+    _window = "15min"
+    _label = "Delta 15min"
 
 # Trend Arrow sensor
 class TrendArrowSensor(LibreLinkSensor):
@@ -506,7 +356,6 @@ class TrendArrowSensor(LibreLinkSensor):
         """Initialize the sensor."""
         super().__init__(coordinator, patient_id)
         self._attr_icon = "mdi:arrow-up-down"
-        self._calculated_trend = None
 
     @property
     def name(self):
@@ -516,35 +365,13 @@ class TrendArrowSensor(LibreLinkSensor):
     @property
     def native_value(self):
         """Return the state of the sensor (the arrow character)."""
-        try:
-            if hasattr(self.coordinator, 'trend_calculator') and self.coordinator.trend_calculator:
-                if self._data.measurement and self._data.measurement.value:
-                    # Add measurement to calculator
-                    timestamp = self._data.measurement.timestamp
-                    if hasattr(timestamp, 'isoformat'):
-                        timestamp_str = timestamp.isoformat()
-                    else:
-                        timestamp_str = str(timestamp)
-                    
-                    measurement_data = {
-                        "Timestamp": timestamp_str,
-                        "Value": self._data.measurement.value,
-                        "TrendArrow": self._data.measurement.trend
-                    }
-                    
-                    self.coordinator.trend_calculator.add_measurement(measurement_data)
-                    trend_info = self.coordinator.trend_calculator.calculate_trend()
-                    self._calculated_trend = trend_info
-                    
-                    # Return the arrow character
-                    return trend_info.get("arrow", "→")
-        except Exception as e:
-            _LOGGER.debug("Trend arrow calculation failed: %s", e)
-        
-        # Fallback to server trend
+        trend_info = self._trend_info
+        if trend_info:
+            return trend_info.get("arrow", "→")
+
+        # No cached trend yet - fall back to the server-provided trend arrow.
         if measurement := self._data.measurement:
             if trend := measurement.trend:
-                # Convert server trend to arrow
                 if isinstance(trend, int):
                     arrow_map = {
                         1: "↓",   # Falling fast
@@ -555,7 +382,6 @@ class TrendArrowSensor(LibreLinkSensor):
                     }
                     return arrow_map.get(trend, "→")
                 elif isinstance(trend, str):
-                    # If server provides string trend
                     trend_map = {
                         "FALLING_FAST": "↓",
                         "FALLING": "↘",
@@ -564,52 +390,40 @@ class TrendArrowSensor(LibreLinkSensor):
                         "RISING_FAST": "↑",
                     }
                     return trend_map.get(str(trend).upper(), "→")
-        
+
         return "→"  # Default arrow
 
     @property
     def icon(self):
         """Return the icon for the frontend based on enhanced trend calculation."""
-        # Use trend calculator data for icon, not the original GLUCOSE_TREND_ICON
-        if self._calculated_trend:
-            trend_category = self._calculated_trend.get("trend", "UNKNOWN").upper()
-            
-            # Map the trend calculator categories to Material Design Icons
-            # This matches what trend_calculator._trend_to_arrow() returns
-            icon_mapping = {
-                "FALLING_FAST": "mdi:arrow-down-bold",      # ↓
-                "FALLING": "mdi:arrow-bottom-right",                # ↘
-                "STABLE": "mdi:arrow-right",                # →
-                "RISING": "mdi:arrow-top-right",                   # ↗
-                "RISING_FAST": "mdi:arrow-up-bold",         # ↑
-                "STALE_DATA": "mdi:clock-alert-outline",    # Clock with alert for stale data
-                "UNKNOWN": "mdi:help-circle-outline",       # Question mark for unknown
-            }
-            
-            return icon_mapping.get(trend_category, "mdi:help-circle-outline")
-        
-        # Fallback if calculation hasn't run yet
-        return "mdi:help-circle-outline"
+        trend_category = self._trend_info.get("trend", "UNKNOWN").upper()
+
+        icon_mapping = {
+            "FALLING_FAST": "mdi:arrow-down-bold",      # ↓
+            "FALLING": "mdi:arrow-bottom-right",        # ↘
+            "STABLE": "mdi:arrow-right",                # →
+            "RISING": "mdi:arrow-top-right",            # ↗
+            "RISING_FAST": "mdi:arrow-up-bold",         # ↑
+            "STALE_DATA": "mdi:clock-alert-outline",    # Clock with alert for stale data
+            "UNKNOWN": "mdi:help-circle-outline",       # Question mark for unknown
+        }
+
+        return icon_mapping.get(trend_category, "mdi:help-circle-outline")
 
     @property
     def extra_state_attributes(self):
         """Return the state attributes."""
         attrs = super().extra_state_attributes
-        
-        if self._calculated_trend:
-            attrs.update({
-                "trend_description": self._calculated_trend.get("description", "Unknown"),
-                "trend_category": self._calculated_trend.get("trend", "UNKNOWN"),
-                "trend_rate_mmoll_per_min": round(self._calculated_trend.get("rate", 0.0) * 0.0555, 4),
-            })
-        
-        return attrs
 
-    async def async_update(self):
-        """Update the arrow based on latest trend calculation."""
-        # This empty method triggers the coordinator to update this sensor
-        # The actual calculation happens in native_value property
-        pass
+        trend_info = self._trend_info
+        if trend_info:
+            attrs.update({
+                "trend_description": trend_info.get("description", "Unknown"),
+                "trend_category": trend_info.get("trend", "UNKNOWN"),
+                "trend_rate_mmoll_per_min": round(mgdl_to_mmoll(trend_info.get("rate", 0.0)), 4),
+            })
+
+        return attrs
 
 class MeasurementSensor(LibreLinkSensor):
     """Glucose Measurement Sensor class."""
@@ -623,7 +437,6 @@ class MeasurementSensor(LibreLinkSensor):
         """Initialize the sensor class."""
         super().__init__(coordinator, pid)
         self.unit = unit
-        self._calculated_trend = None  # Add this for enhanced trend
 
     @property
     def state_class(self):
@@ -653,48 +466,24 @@ class MeasurementSensor(LibreLinkSensor):
     @property
     def icon(self):
         """Return the icon for the frontend."""
-        # Get trend info from calculator (same as EnhancedTrendSensor)
-        try:
-            if hasattr(self.coordinator, 'trend_calculator') and self.coordinator.trend_calculator:
-                if self._data.measurement and self._data.measurement.value:
-                    # Convert timestamp to string for trend calculator
-                    timestamp = self._data.measurement.timestamp
-                    if hasattr(timestamp, 'isoformat'):
-                        timestamp_str = timestamp.isoformat()
-                    else:
-                        timestamp_str = str(timestamp)
-                    
-                    measurement_data = {
-                        "Timestamp": timestamp_str,
-                        "Value": self._data.measurement.value,
-                        "TrendArrow": self._data.measurement.trend
-                    }
-                    
-                    self.coordinator.trend_calculator.add_measurement(measurement_data)
-                    trend_info = self.coordinator.trend_calculator.calculate_trend()
-                    self._calculated_trend = trend_info
-                    
-                    # Use enhanced trend icon mapping
-                    trend_category = trend_info.get("trend", "UNKNOWN").upper()
-                    icon_mapping = {
-                        "FALLING_FAST": "mdi:arrow-down-bold",
-                        "FALLING": "mdi:arrow-bottom-right",
-                        "STABLE": "mdi:arrow-right",
-                        "RISING": "mdi:arrow-top-right",
-                        "RISING_FAST": "mdi:arrow-up-bold",
-                        "STALE_DATA": "mdi:clock-alert-outline",
-                        "UNKNOWN": "mdi:help-circle-outline",
-                    }
-                    
-                    return icon_mapping.get(trend_category, "mdi:help-circle-outline")
-        except Exception as e:
-            _LOGGER.debug("Enhanced icon calculation failed for MeasurementSensor: %s", e)
-        
-        # Fallback to original trend icon
+        trend_category = self._trend_info.get("trend", "UNKNOWN").upper()
+
+        if trend_category != "UNKNOWN":
+            icon_mapping = {
+                "FALLING_FAST": "mdi:arrow-down-bold",
+                "FALLING": "mdi:arrow-bottom-right",
+                "STABLE": "mdi:arrow-right",
+                "RISING": "mdi:arrow-top-right",
+                "RISING_FAST": "mdi:arrow-up-bold",
+                "STALE_DATA": "mdi:clock-alert-outline",
+            }
+            return icon_mapping.get(trend_category, "mdi:help-circle-outline")
+
+        # No cached trend yet - fall back to the original server-provided trend icon.
         if measurement := self._data.measurement:
             if trend := measurement.trend:
                 return GLUCOSE_TREND_ICON.get(trend, GLUCOSE_VALUE_ICON)
-        
+
         return GLUCOSE_VALUE_ICON
 
 class TimeInRangeSensor(LibreLinkSensor):
@@ -791,52 +580,56 @@ class TimeInRangeSensor(LibreLinkSensor):
     def native_unit_of_measurement(self):
         return "%"
 
-    @property
-    def native_value(self):
-        # Get per-patient 24h history from coordinator
-        history = {}
-        if hasattr(self.coordinator, 'history_24h'):
-            history = self.coordinator.history_24h.get(self.id, [])
-
+    def _tir_stats(self):
+        """Compute TIR stats once, shared by native_value and extra_state_attributes."""
+        history = self.coordinator.history_24h.get(self.id, [])
         total = len(history)
-        if total == 0:
-            return None
 
-        # Use patient targets (mg/dL)
         try:
             low = self._data.target.low
             high = self._data.target.high
         except Exception:
+            low = high = None
+
+        in_range = None
+        if total and low is not None:
+            in_range = sum(
+                1 for m in history
+                if m.get("value") is not None and low <= m["value"] <= high
+            )
+
+        return {
+            "history": history,
+            "total": total,
+            "low": low,
+            "high": high,
+            "in_range": in_range,
+        }
+
+    @property
+    def native_value(self):
+        stats = self._tir_stats()
+        if not stats["total"] or stats["in_range"] is None:
             return None
-
-        in_range = sum(1 for m in history if (m.get('value') is not None and low <= m['value'] <= high))
-
-        percent = round((in_range / total) * 100.0, 2)
-        return percent
+        return round((stats["in_range"] / stats["total"]) * 100.0, 2)
 
     @property
     def extra_state_attributes(self):
         attrs = super().extra_state_attributes
-        history = {}
-        if hasattr(self.coordinator, 'history_24h'):
-            history = self.coordinator.history_24h.get(self.id, [])
+        stats = self._tir_stats()
+        history = stats["history"]
 
-        total = len(history)
-        attrs.update({
-            "total_measurements": total,
-        })
+        attrs.update({"total_measurements": stats["total"]})
 
-        try:
+        if stats["low"] is not None:
             attrs.update({
-                "target_low_mgdl": self._data.target.low,
-                "target_high_mgdl": self._data.target.high,
+                "target_low_mgdl": stats["low"],
+                "target_high_mgdl": stats["high"],
             })
-        except Exception:
-            pass
 
-        if total:
+        if stats["total"]:
             attrs.update({
-                "in_range_count": sum(1 for m in history if (m.get('value') is not None and self._data.target.low <= m['value'] <= self._data.target.high)),
+                "in_range_count": stats["in_range"],
                 "start_time": history[0]["timestamp"].isoformat() if history[0].get("timestamp") else None,
                 "end_time": history[-1]["timestamp"].isoformat() if history[-1].get("timestamp") else None,
             })
