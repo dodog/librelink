@@ -19,8 +19,8 @@ Bring your Abbott FreeStyle Libre Link continuous glucose monitor (CGM) data int
 For every patient linked to your LibreLinkUp account, this integration creates a full set of sensors with an enhanced, noise-reduced trend calculation that's more accurate than the sensor's native trend readout.
 
 ## Features
-
 - 📈 **Enhanced trend calculation** — More accurate than the sensor's native trend. Uses a weighted average across multiple time windows (1-min, 5-min, 15-min) with smoothing logic to reduce noise and better reflect true physiological changes, instead of relying on the sensor's raw native trend.
+- 🎯 **Time In Range (24h)** — Rolling 24-hour percentage of readings within your target range, persisted across Home Assistant restarts.
 - 🩸 **Per-patient sensors** — automatically sets up entities for every patient linked to your LibreLinkUp account.
 - ⚠️ **High/low binary sensors** — instantly know when glucose is out of range.
 - 🖥️ **Configured entirely through the Home Assistant UI** — no YAML required to get started.
@@ -35,11 +35,13 @@ For every patient linked to your LibreLinkUp account, this integration creates a
 |---|---|
 | Expiration of Sensor (days) | Number of days remaining until the CGM sensor expires |
 | Glucose Measurement (mg/dL) | Latest glucose reading, updated every minute. |
+| Time In Range (24h) | Percentage of readings within your target range over a rolling 24-hour window. Survives Home Assistant restarts by rebuilding from recorder history. |
 | Glucose Trend | Direction and speed of glucose change, classified using clinical thresholds. |
 | Trend Arrow | Visual arrow indicator: ↑ ↗ → ↘ ↓ |
 | Rate of Change | Precise speed of change, in mg/dL/min or mmol/L/min. |
 | Delta 1 / 5 / 15 Min | Absolute change in glucose over the last 1, 5, and 15 minutes (mg/dL or mmol/L). |
 | Minutes Since Update | Time elapsed since the last reading was received. |
+
 
 ### `binary_sensor`
 
