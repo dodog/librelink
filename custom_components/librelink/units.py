@@ -2,6 +2,18 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 
+MGDL_PER_MMOLL = 18
+
+
+def mgdl_to_mmoll(value: float) -> float:
+    """Convert a mg/dL value (or rate) to mmol/L."""
+    return value / MGDL_PER_MMOLL
+
+
+def mmoll_to_mgdl(value: float) -> float:
+    """Convert a mmol/L value (or rate) to mg/dL."""
+    return value * MGDL_PER_MMOLL
+
 
 @dataclass
 class UnitOfMeasurement:
@@ -23,7 +35,7 @@ UNITS_OF_MEASUREMENT = (
     UnitOfMeasurement(
         unit_of_measurement="mmol/L",
         suggested_display_precision=1,
-        from_mg_per_dl=lambda x: x / 18,
-        to_mg_per_dl=lambda x: x * 18,
+        from_mg_per_dl=mgdl_to_mmoll,
+        to_mg_per_dl=mmoll_to_mgdl,
     ),
 )
