@@ -4,6 +4,8 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any, Optional
 
+from .units import mgdl_to_mmoll
+
 _LOGGER = logging.getLogger(__name__)
 
 class TrendCalculator:
@@ -273,7 +275,7 @@ class TrendCalculator:
         # rate is in mg/dL per minute
         
         # Convert to mmol/L per minute for threshold checking
-        rate_mmol = rate * 0.0555
+        rate_mmol = mgdl_to_mmoll(rate)
         
         # Use mmol/L thresholds for clarity
         if rate_mmol <= -0.166:           
