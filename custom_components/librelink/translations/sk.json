@@ -1,34 +1,34 @@
 {
-  "title": "Integrácia LibreLink",
-  "config": {
-    "step": {
-      "user": {
-        "title": "Zadajte svoj email a heslo",
-        "description": "Dokumentácia: {documentation_url}",
-        "data": {
-          "username": "Email",
-          "password": "Heslo",
-          "Country": "Vyberte svoj región",
-          "unit_of_measurement": "Jednotka merania glykémie",
-          "url": "Región"
+    "title": "Integrácia LibreLink",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Zadajte svoj email a heslo",
+                "description": "Dokumentácia: {documentation_url}",
+                "data": {
+                    "username": "Email",
+                    "password": "Heslo",
+                    "Country": "Vyberte svoj región",
+                    "unit_of_measurement": "Jednotka merania glykémie",
+                    "url": "Región"
+                }
+            },
+            "patient": {
+                "title": "Vyberte pacienta a jednotky",
+                "data": {
+                    "patient_id": "Pacient",
+                    "unit_of_measurement": "Jednotka merania"
+                },
+                "description": "Vyberte pacienta a preferovanú jednotku merania."
+            }
+        },
+        "error": {
+            "auth": "Používateľské meno/heslo nie je správne.",
+            "connection": "Nie je možné sa pripojiť k serveru.",
+            "unknown": "Vyskytla sa neznáma chyba."
+        },
+        "abort": {
+            "already_configured": "Zariadenie je už nastavené"
         }
-      },
-      "patient": {
-          "title": "Vyberte pacienta a jednotky",
-          "data": {
-              "patient_id": "Pacient",
-              "unit_of_measurement": "Jednotka merania"
-          },
-          "description": "Vyberte pacienta a preferovanú jednotku merania."
-      }
-    },
-    "error": {
-      "auth": "Používateľské meno/heslo nie je správne.",
-      "connection": "Nie je možné sa pripojiť k serveru.",
-      "unknown": "Vyskytla sa neznáma chyba."
-    },
-    "abort": {
-      "already_configured": "Zariadenie je už nastavené"
     }
-  }
-}
+} 
