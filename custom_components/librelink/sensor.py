@@ -52,6 +52,7 @@ async def async_setup_entry(
 
     sensors = [
         MeasurementSensor(coordinator, pid, unit),
+        TimeInRangeSensor(coordinator, pid, unit),
         TrendSensor(coordinator, pid),
         TrendArrowSensor(coordinator, pid),
         ApplicationTimestampSensor(coordinator, pid),
@@ -64,6 +65,7 @@ async def async_setup_entry(
     ]
 
     async_add_entities(sensors)
+
 
 
 class LibreLinkSensorBase(CoordinatorEntity[LibreLinkDataUpdateCoordinator]):
@@ -689,6 +691,73 @@ class MeasurementSensor(LibreLinkSensor):
                 return GLUCOSE_TREND_ICON.get(trend, GLUCOSE_VALUE_ICON)
         
         return GLUCOSE_VALUE_ICON
+
+class TimeInRangeSensor(LibreLinkSensor):
+    """Time In Range (24h) sensor."""
+
+    def __init__(self, coordinator, patient_id, unit: UnitOfMeasurement):
+        super().__init__(coordinator, patient_id)
+        self.unit = unit
+
+    @property
+    def name(self):
+        return "Time In Range (24h)"
+
+    @property
+    def native_unit_of_measurement(self):
+        return "%"
+
+    @property
+    def native_value(self):
+        # Get per-patient 24h history from coordinator
+        history = {}
+        if hasattr(self.coordinator, 'history_24h'):
+            history = self.coordinator.history_24h.get(self.id, [])
+
+        total = len(history)
+        if total == 0:
+            return None
+
+        # Use patient targets (mg/dL)
+        try:
+            low = self._data.target.low
+            high = self._data.target.high
+        except Exception:
+            return None
+
+        in_range = sum(1 for m in history if (m.get('value') is not None and low <= m['value'] <= high))
+
+        percent = round((in_range / total) * 100.0, 2)
+        return percent
+
+    @property
+    def extra_state_attributes(self):
+        attrs = super().extra_state_attributes
+        history = {}
+        if hasattr(self.coordinator, 'history_24h'):
+            history = self.coordinator.history_24h.get(self.id, [])
+
+        total = len(history)
+        attrs.update({
+            "total_measurements": total,
+        })
+
+        try:
+            attrs.update({
+                "target_low_mgdl": self._data.target.low,
+                "target_high_mgdl": self._data.target.high,
+            })
+        except Exception:
+            pass
+
+        if total:
+            attrs.update({
+                "in_range_count": sum(1 for m in history if (m.get('value') is not None and self._data.target.low <= m['value'] <= self._data.target.high)),
+                "start_time": history[0]["timestamp"].isoformat() if history[0].get("timestamp") else None,
+                "end_time": history[-1]["timestamp"].isoformat() if history[-1].get("timestamp") else None,
+            })
+
+        return attrs
 
 class TimestampSensor(LibreLinkSensor):
     """Timestamp Sensor class."""
