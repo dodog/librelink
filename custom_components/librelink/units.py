@@ -10,6 +10,7 @@ class UnitOfMeasurement:
     unit_of_measurement: str
     suggested_display_precision: int
     from_mg_per_dl: Callable[[float], float]
+    to_mg_per_dl: Callable[[float], float]
 
 
 UNITS_OF_MEASUREMENT = (
@@ -17,10 +18,12 @@ UNITS_OF_MEASUREMENT = (
         unit_of_measurement="mg/dL",
         suggested_display_precision=0,
         from_mg_per_dl=lambda x: x,
+        to_mg_per_dl=lambda x: x,
     ),
     UnitOfMeasurement(
         unit_of_measurement="mmol/L",
         suggested_display_precision=1,
         from_mg_per_dl=lambda x: x / 18,
+        to_mg_per_dl=lambda x: x * 18,
     ),
 )
