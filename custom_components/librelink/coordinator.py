@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
@@ -26,6 +26,8 @@ class LibreLinkDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Patient]]):
         
         # Initialize the trend calculator
         self.trend_calculator = TrendCalculator(max_history=60)  # Store up to 60 measurements
+        # Per-patient 24-hour history for longer-term metrics (e.g., TIR)
+        self.history_24h: dict[str, list] = {}
 
         super().__init__(
             hass=hass,
@@ -77,5 +79,27 @@ class LibreLinkDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Patient]]):
                             "Added measurement for patient %s to trend calculator. Value: %s mg/dL, Time: %s",
                             patient.id, patient.measurement.value, timestamp_str
                         )
+                        # Also append to per-patient 24h history
+                        try:
+                            ts = timestamp
+                            if isinstance(ts, str):
+                                if ts.endswith("Z"):
+                                    ts = ts[:-1] + "+00:00"
+                                parsed = datetime.fromisoformat(ts)
+                            elif isinstance(ts, datetime):
+                                parsed = ts
+                            else:
+                                parsed = datetime.now(timezone.utc)
+                            if parsed.tzinfo is None:
+                                parsed = parsed.replace(tzinfo=timezone.utc)
+                        except Exception:
+                            parsed = datetime.now(timezone.utc)
+
+                        patient_hist = self.history_24h.setdefault(patient.id, [])
+                        patient_hist.append({"timestamp": parsed, "value": patient.measurement.value})
+
+                        # Prune entries older than 24 hours
+                        cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+                        self.history_24h[patient.id] = [m for m in patient_hist if m["timestamp"] > cutoff]
         
         return patients_dict
