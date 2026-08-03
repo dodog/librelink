@@ -58,7 +58,7 @@ You can visualize glucose trends with a [`mini-graph-card`](https://github.com/k
 # See the full example here:
 # https://github.com/dodog/librelink/blob/main/custom_components/librelink/mini-graph-glucose.yml
 ```
-or you can use [LibreLink Extended Card](https://github.com/dodog/librelink/blob/main/custom_components/librelink/mini-graph-glucose.yml)                   
+or you can use [LibreLink Extended Card](https://github.com/dodog/librelink-extended-card)                   
 <img width="535" height="302" alt="librelink-extended-card-screenshot" src="https://raw.githubusercontent.com/dodog/librelink-extended-card/refs/heads/main/screenshot.png" />
 
 ## Installation
