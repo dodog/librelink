@@ -66,8 +66,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Handle removal of an entry."""
     if unloaded := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
-        coordinator: LibreLinkDataUpdateCoordinator = hass.data[DOMAIN][CONF_USERNAME]
+        username = entry.data[CONF_USERNAME]
+        coordinator: LibreLinkDataUpdateCoordinator = hass.data[DOMAIN][username]
         coordinator.unregister_patient(entry.data[CONF_PATIENT_ID])
         if coordinator.tracked_patients == 0:
-            hass.data[DOMAIN].pop(CONF_USERNAME)
+            hass.data[DOMAIN].pop(username)
     return unloaded
