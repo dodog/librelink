@@ -21,8 +21,8 @@ from .const import (
 SENSOR_DEFAULT_LIFESPAN_DAYS = 14
 SENSOR_PLUS_LIFESPAN_DAYS = 15
 SENSOR_LIFESPAN_DAYS = {
-    "3": SENSOR_DEFAULT_LIFESPAN_DAYS,  # Libre 2 & Libre 3 standard (14 days)
-    "4": SENSOR_PLUS_LIFESPAN_DAYS,      # Libre 2 Plus & Libre 3 Plus (15 days)
+    3: SENSOR_DEFAULT_LIFESPAN_DAYS,  # Libre 2 & maybe Libre 3 standard (14 days)
+    4: SENSOR_PLUS_LIFESPAN_DAYS,      # Libre 3 Plus & maybe Libre 2 Plus (15 days)
 }
 
 
@@ -49,7 +49,7 @@ class LibreLinkDevice:
 
     serial_number: str
     application_timestamp: datetime | None
-    product_type: str | None = None
+    product_type: int | None = None
 
     @property
     def sensor_lifespan(self) -> int:
@@ -89,8 +89,9 @@ class Patient:
     def from_api_response_data(cls, data):
         """Create a Patient object from the API response data."""
         LOGGER.debug(
-            "Parsed sensor data pt=%s sn=%s",
+            "Parsed sensor data pt=%r (type=%s) sn=%s",
             data["sensor"].get("pt"),
+            type(data["sensor"].get("pt")).__name__,
             data["sensor"].get("sn"),
         )
         return cls(
