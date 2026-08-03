@@ -18,6 +18,7 @@ class TrendCalculator:
         self.max_history = max_history
         self.history: List[Dict[str, Any]] = []
         self._last_added_timestamp = None  # Track last timestamp to avoid duplicates
+        self._stale_episode_active = False  # Avoid re-logging the same stale gap every poll
 
     def add_measurement(self, measurement: Dict[str, Any]) -> None:
         """Add a new glucose measurement to history, skipping duplicates."""
@@ -92,11 +93,28 @@ class TrendCalculator:
         minutes_since_last = (current_time - latest_time).total_seconds() / 60.0
 
         if minutes_since_last > data_timeout_minutes:
-            _LOGGER.warning(
-                "Data is stale. Latest measurement is %.1f minutes old. Returning stale state.",
+            if not self._stale_episode_active:
+                # First poll of this gap - log it once at WARNING so it's visible.
+                _LOGGER.warning(
+                    "Data is stale. Latest measurement is %.1f minutes old. Returning stale state.",
+                    minutes_since_last
+                )
+                self._stale_episode_active = True
+            else:
+                # Same ongoing gap - keep it out of the normal log at DEBUG only.
+                _LOGGER.debug(
+                    "Data is still stale. Latest measurement is %.1f minutes old.",
+                    minutes_since_last
+                )
+            return self._get_stale_data_result(minutes_since_last)
+
+        if self._stale_episode_active:
+            # Data is fresh again after a gap - log the recovery once.
+            _LOGGER.info(
+                "Data is fresh again. Latest measurement is %.1f minutes old.",
                 minutes_since_last
             )
-            return self._get_stale_data_result(minutes_since_last)
+            self._stale_episode_active = False
 
         # 2. CHECK FOR ENOUGH RECENT DATA
         if len(self.history) < 2:
