@@ -1,6 +1,6 @@
 type: custom:mini-graph-card
 entities:
-  - entity: sensor.maxence_van_schendel_glucose_measurement
+  - entity: sensor.name_surname_measurement
     state_adaptive_color: true
     show_icon: true
 name: Glycémie
