@@ -18,6 +18,13 @@ from .const import (
     VERSION_APP,
 )
 
+SENSOR_DEFAULT_LIFESPAN_DAYS = 14
+SENSOR_PLUS_LIFESPAN_DAYS = 15
+SENSOR_LIFESPAN_DAYS = {
+    "3": SENSOR_DEFAULT_LIFESPAN_DAYS,  # Libre 2 & Libre 3 standard (14 days)
+    "4": SENSOR_PLUS_LIFESPAN_DAYS,      # Libre 2 Plus & Libre 3 Plus (15 days)
+}
+
 
 @dataclass
 class Target:
@@ -42,11 +49,24 @@ class LibreLinkDevice:
 
     serial_number: str
     application_timestamp: datetime | None
+    product_type: str | None = None
+
+    @property
+    def sensor_lifespan(self) -> int:
+        """Return the sensor lifespan in days based on product type."""
+        return SENSOR_LIFESPAN_DAYS.get(self.product_type, SENSOR_DEFAULT_LIFESPAN_DAYS)
+
+    @property
+    def is_plus_sensor(self) -> bool:
+        """Return True if this sensor is a plus model with extended lifetime."""
+        return self.sensor_lifespan == SENSOR_PLUS_LIFESPAN_DAYS
 
     @property
     def expiration_timestamp(self):
         """Return the expiration timestamp of the sensor."""
-        return self.application_timestamp + timedelta(days=14)
+        if self.application_timestamp is None:
+            return None
+        return self.application_timestamp + timedelta(days=self.sensor_lifespan)
 
 
 @dataclass
@@ -68,6 +88,11 @@ class Patient:
     @classmethod
     def from_api_response_data(cls, data):
         """Create a Patient object from the API response data."""
+        LOGGER.debug(
+            "Parsed sensor data pt=%s sn=%s",
+            data["sensor"].get("pt"),
+            data["sensor"].get("sn"),
+        )
         return cls(
             id=data["patientId"],
             first_name=data["firstName"],
@@ -85,10 +110,11 @@ class Patient:
                 low=data["targetLow"],
             ),
             device=LibreLinkDevice(
-                serial_number=f'{data["sensor"]["pt"]}{data['sensor']['sn']}',
+                serial_number=f'{data["sensor"]["pt"]}{data["sensor"]["sn"]}',
                 application_timestamp=datetime.fromtimestamp(
                     data["sensor"]["a"], tz=UTC
                 ),
+                product_type=data["sensor"].get("pt"),
             ),
         )
 
