@@ -11,8 +11,6 @@ from .api import LibreLinkAPI
 from .const import CONF_PATIENT_ID, DOMAIN, LOGGER
 from .coordinator import LibreLinkDataUpdateCoordinator
 
-# Better trend calculation
-from .trend_calculator import TrendCalculator
 PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
 
 
@@ -46,9 +44,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             hass=hass, api=api, patient_id=patient_id
         )
 
-        # Attach the calculator to the coordinator
-        coordinator.trend_calculator = TrendCalculator()  
-        
         # First poll of the data to be ready for entities initialization
         await coordinator.async_config_entry_first_refresh()
 
