@@ -4,6 +4,7 @@
   "codeowners": ["@dodog", "@gillesvs"],
   "config_flow": true,
   "dependencies": [],
+  "after_dependencies": ["recorder"],
   "documentation": "https://github.com/dodog/librelink",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/dodog/librelink/issues",
