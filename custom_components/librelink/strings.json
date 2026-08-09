@@ -17,7 +17,11 @@
                 "title": "Select Patient and Unit",
                 "data": {
                     "patient_id": "Patient",
-                    "unit_of_measurement": "Unit of Measurement"
+                    "unit_of_measurement": "Unit of Measurement",
+                    "display_name": "Display name (optional)"
+                },
+                "data_description": {
+                    "display_name": "Optional nickname shown instead of the patient's real name. Leave blank to use the real name."
                 },
                 "description": "Select the patient and preferred unit of measurement."
             }
