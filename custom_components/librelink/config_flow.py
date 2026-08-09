@@ -28,7 +28,7 @@ from .api import (
     LibreLinkAPIConnectionError,
     LibreLinkAPIError,
 )
-from .const import BASE_URL_LIST, CONF_PATIENT_ID, DOMAIN, LOGGER
+from .const import BASE_URL_LIST, CONF_DISPLAY_NAME, CONF_PATIENT_ID, DOMAIN, LOGGER
 from .units import UNITS_OF_MEASUREMENT
 
 
@@ -108,8 +108,14 @@ class LibreLinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 user_input[CONF_PATIENT_ID]
             )
 
+            # Optional nickname: if provided, used for the config entry title
+            # instead of the patient's real name. Purely optional - if left
+            # blank, behavior is identical to before this field existed.
+            display_name = (user_input.get(CONF_DISPLAY_NAME) or "").strip()
+            title_name = display_name or patient.name
+
             return self.async_create_entry(
-                title=f"{patient.name} (via {user_input[CONF_USERNAME]})",
+                title=f"{title_name} (via {user_input[CONF_USERNAME]})",
                 data=user_input,
             )
 
@@ -131,6 +137,9 @@ class LibreLinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                                 u.unit_of_measurement for u in UNITS_OF_MEASUREMENT
                             ]
                         )
+                    ),
+                    vol.Optional(CONF_DISPLAY_NAME): TextSelector(
+                        TextSelectorConfig(type=TextSelectorType.TEXT),
                     ),
                 }
             ),
