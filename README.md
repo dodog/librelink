@@ -54,11 +54,10 @@ For every patient linked to your LibreLinkUp account, this integration creates a
 
 You can visualize glucose trends with a [`mini-graph-card`](https://github.com/kalkih/mini-graph-card):
 <img width="612" height="414" alt="302025877-bfed1b2b-dbf7-4666-a202-885ff3db67b8" src="https://github.com/user-attachments/assets/19257952-2cce-4872-8db3-4738889430b2" />
-```yaml
-# See the full example here:
-# https://github.com/dodog/librelink/blob/main/custom_components/librelink/mini-graph-glucose.yml
-```
-or you can use [LibreLink Extended Card](https://github.com/dodog/librelink-extended-card)                   
+
+See the full example here: [mini-graph-glucose.yml](https://github.com/dodog/librelink/blob/main/custom_components/librelink/mini-graph-glucose.yml) or you can use
+
+[LibreLink Extended Card](https://github.com/dodog/librelink-extended-card)                   
 <img width="535" height="302" alt="librelink-extended-card-screenshot" src="https://raw.githubusercontent.com/dodog/librelink-extended-card/refs/heads/main/screenshot.png" />
 
 ## Installation
