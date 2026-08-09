@@ -22,7 +22,7 @@ SENSOR_DEFAULT_LIFESPAN_DAYS = 14
 SENSOR_PLUS_LIFESPAN_DAYS = 15
 SENSOR_LIFESPAN_DAYS = {
     3: SENSOR_DEFAULT_LIFESPAN_DAYS,  # Libre 2 & maybe Libre 3 standard (14 days)
-    4: SENSOR_PLUS_LIFESPAN_DAYS,      # Libre 3 Plus & maybe Libre 2 Plus (15 days)
+    4: SENSOR_PLUS_LIFESPAN_DAYS,     # Libre 3 Plus & maybe Libre 2 Plus (15 days)
 }
 
 
@@ -163,7 +163,8 @@ class LibreLinkAPI:
         ]
 
         LOGGER.debug(
-            "Number of patients : %s and patient list %s", len(patients), patients
+            "Number of patients : %s and patient ids %s",
+            len(patients), [p.id for p in patients]
         )
         self._token = response["ticket"]["token"]
 
