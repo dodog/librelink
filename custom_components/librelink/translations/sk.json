@@ -17,7 +17,11 @@
                 "title": "Vyberte pacienta a jednotky",
                 "data": {
                     "patient_id": "Pacient",
-                    "unit_of_measurement": "Jednotka merania"
+                    "unit_of_measurement": "Jednotka merania",
+                    "display_name": "Zobrazované meno (nepovinné)"
+                },
+                "data_description": {
+                    "display_name": "Nepovinná prezývka zobrazená namiesto skutočného mena pacienta. Ak ho ponecháte prázdne, použije sa skutočné meno."
                 },
                 "description": "Vyberte pacienta a preferovanú jednotku merania."
             }

@@ -17,7 +17,11 @@
                 "title": "Wybierz pacjenta i jednostkę",
                 "data": {
                     "patient_id": "Pacjent",
-                    "unit_of_measurement": "Jednostka miary"
+                    "unit_of_measurement": "Jednostka miary",
+                    "display_name": "Nazwa wyświetlana (opcjonalnie)"
+                },
+                "data_description": {
+                    "display_name": "Opcjonalny pseudonim wyświetlany zamiast prawdziwego imienia i nazwiska pacjenta. Pozostaw puste, aby użyć prawdziwego imienia."
                 },
                 "description": "Wybierz pacjenta i preferowaną jednostkę miary"
             }
