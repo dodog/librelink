@@ -444,6 +444,11 @@ class MeasurementSensor(LibreLinkSensor):
         return SensorStateClass.MEASUREMENT
 
     @property
+    def device_class(self):
+        """Return the device class of the sensor."""
+        return SensorDeviceClass.BLOOD_GLUCOSE_CONCENTRATION
+
+    @property
     def name(self):
         """Return the name of the sensor."""
         return "Measurement"
@@ -461,6 +466,13 @@ class MeasurementSensor(LibreLinkSensor):
     @property
     def unit_of_measurement(self):
         """Return the unit of measurement of the sensor."""
+        return self.unit.unit_of_measurement
+
+    @property
+    def native_unit_of_measurement(self):
+        """Return the native unit of measurement of the sensor (used internally by
+        SensorEntity to validate against device_class's allowed units).
+        """
         return self.unit.unit_of_measurement
 
     @property
