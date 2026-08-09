@@ -20,10 +20,16 @@ LibreLinkConfigEntry = ConfigEntry[LibreLinkDataUpdateCoordinator]
 async def async_setup_entry(hass: HomeAssistant, entry: LibreLinkConfigEntry) -> bool:
     """Set up this integration using UI."""
 
+    # Never log entry.data directly - Redact username and password before logging.
+    _redacted_data = {
+        **entry.data,
+        CONF_USERNAME: "**REDACTED**",
+        CONF_PASSWORD: "**REDACTED**",
+    }
     LOGGER.debug(
         "Call async_setup_entry entry: entry_id= %s, data= %s",
         entry.entry_id,
-        entry.data,
+        _redacted_data,
     )
 
     username = entry.data[CONF_USERNAME]
