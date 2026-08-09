@@ -5,9 +5,10 @@ from __future__ import annotations
 from datetime import timedelta, datetime, timezone
 
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import LibreLinkAPI, Patient
+from .api import LibreLinkAPI, LibreLinkAPIAuthenticationError, LibreLinkAPIError, Patient
 from .const import DOMAIN, LOGGER, REFRESH_RATE_MIN
 from .trend_calculator import TrendCalculator
 
@@ -62,8 +63,14 @@ class LibreLinkDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Patient]]):
 
     async def _async_update_data(self):
         """Update data via library."""
-        # Get the list of patients from API
-        patients_list = await self.api.async_get_data()
+        # Get the list of patients from API. Translate API-level failures into
+        # what DataUpdateCoordinator expects: ConfigEntryAuthFailed triggers HA's reauth flow
+        try:
+            patients_list = await self.api.async_get_data()
+        except LibreLinkAPIAuthenticationError as err:
+            raise ConfigEntryAuthFailed("Invalid LibreLinkUp credentials") from err
+        except LibreLinkAPIError as err:
+            raise UpdateFailed(f"Error communicating with LibreLinkUp: {err}") from err
 
         # Convert to dictionary for return
         patients_dict = {patient.id: patient for patient in patients_list}
