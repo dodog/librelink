@@ -11,7 +11,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_UNIT_OF_MEASUREMENT, CONF_USERNAME
+from homeassistant.const import CONF_UNIT_OF_MEASUREMENT
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -43,7 +43,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ):
     """Set up the sensor platform."""
-    coordinator = hass.data[DOMAIN][config_entry.data[CONF_USERNAME]]
+    coordinator = config_entry.runtime_data
 
     # If custom unit of measurement is selectid it is initialized, otherwise MG/DL is used
     unit = {u.unit_of_measurement: u for u in UNITS_OF_MEASUREMENT}.get(

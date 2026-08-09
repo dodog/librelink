@@ -7,11 +7,10 @@ from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_USERNAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import CONF_PATIENT_ID, DOMAIN
+from .const import CONF_PATIENT_ID
 from .coordinator import LibreLinkDataUpdateCoordinator
 from .sensor import LibreLinkSensorBase
 
@@ -23,9 +22,7 @@ async def async_setup_entry(
 ):
     """Set up the binary_sensor platform."""
 
-    coordinator: LibreLinkDataUpdateCoordinator = hass.data[DOMAIN][
-        config_entry.data[CONF_USERNAME]
-    ]
+    coordinator: LibreLinkDataUpdateCoordinator = config_entry.runtime_data
 
     pid = config_entry.data[CONF_PATIENT_ID]
 
