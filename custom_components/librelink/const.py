@@ -44,6 +44,7 @@ GLUCOSE_TREND_MESSAGE: Final = {
 
 
 CONF_PATIENT_ID: Final = "patient_id"
+CONF_DISPLAY_NAME: Final = "display_name"
 
 REFRESH_RATE_MIN: Final = 1
 API_TIME_OUT_SECONDS: Final = 20
