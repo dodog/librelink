@@ -63,12 +63,11 @@ or you can use [LibreLink Extended Card](https://github.com/dodog/librelink-exte
 
 ## Installation
 
-### Via HACS (recommended)
+### Via **[HACS](https://hacs.xyz/)** (recommended)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=dodog&repository=librelink&category=integration)
 
-1. In Home Assistant, go to **[HACS](https://hacs.xyz/)**.
-2. Add this repository as a **custom repository**:
-   `https://github.com/dodog/librelink`
-3. Search for **Librelink** and install it.
+2. Add this repository
+3. Click **download** on bottom right corner and install it.
 4. Restart Home Assistant.
 
 
@@ -82,6 +81,8 @@ or you can use [LibreLink Extended Card](https://github.com/dodog/librelink-exte
 ## Configuration
 
 Configuration is done entirely from the Home Assistant UI:
+
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=librelink)
 
 1. Go to **Settings → Devices & Services → Integrations**.
 2. Click **+ Add Integration** and search for **Librelink**.
@@ -101,7 +102,7 @@ Contributions, bug reports, and feature requests are welcome! Please read the [C
 
 ## Support the Project
 
-If this integration helps you manage your (or a loved one's) diabetes data, consider supporting its development:
+Like this integration? Give it a ⭐ on GitHub. And if this integration helps you manage your (or a loved one's) diabetes data, consider supporting its development:
 
 - ☕ [Buy Me a Coffee](https://www.buymeacoffee.com/dodog)
 - 💛 [Ko-fi](https://ko-fi.com/dodog)
