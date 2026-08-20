@@ -100,7 +100,7 @@ Configuration is done entirely from the Home Assistant UI:
 
 Contributions, bug reports, and feature requests are welcome! Please read the [Contribution Guidelines](CONTRIBUTING.md) before opening a pull request or issue.
 
-## Support the Project
+## ❤️ Support the Project
 
 Like this integration? Give it a ⭐ on GitHub. And if this integration helps you manage your (or a loved one's) diabetes data, consider supporting its development:
 
@@ -109,10 +109,7 @@ Like this integration? Give it a ⭐ on GitHub. And if this integration helps yo
 
 ## Credits
 
-This project is forked from and built on the work of:
-
-- [@gillesvs](https://github.com/gillesvs/librelink)
-- [@kubasaw](https://github.com/kubasaw/librelink)
+This project is forked from and built on the work of [@gillesvs](https://github.com/gillesvs/librelink), [@kubasaw](https://github.com/kubasaw/librelink) and others
 
 ## License
 
