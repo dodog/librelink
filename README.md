@@ -14,7 +14,7 @@
 
 > **Note:** This fork is a continuation of unmaintained [librelink](https://github.com/gillesvs/librelink) integration by [@gillesvs](https://github.com/gillesvs) 
 
-Connect your Abbott FreeStyle LibreLink continuous glucose monitor (CGM) data into Home Assistant, straight from your **LibreLinkUp** account — no extra hardware, no scraping required.
+Connect your Abbott **FreeStyle LibreLink** continuous glucose monitor (CGM) data into Home Assistant, straight from your **LibreLinkUp** account — no extra hardware, no scraping required.
 
 For every patient linked to your LibreLinkUp account, this integration creates a full set of sensors with an enhanced, trend calculation that's more responsive than the sensor's native trend readout.
 
