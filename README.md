@@ -12,7 +12,7 @@
 [buymecoffee]: https://www.buymeacoffee.com/dodog
 
 
-> **Note:** This fork is a continuation of [librelink](https://github.com/gillesvs/librelink) integration by [@gillesvs](https://github.com/gillesvs) 
+> **Note:** This fork is a continuation of unmaintained [librelink](https://github.com/gillesvs/librelink) integration by [@gillesvs](https://github.com/gillesvs) 
 
 Connect your Abbott FreeStyle LibreLink continuous glucose monitor (CGM) data into Home Assistant, straight from your **LibreLinkUp** account — no extra hardware, no scraping required.
 
