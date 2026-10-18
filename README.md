@@ -66,7 +66,7 @@ or you can use [LibreLink Extended Card](https://github.com/dodog/librelink-exte
 ### Via **[HACS](https://hacs.xyz/)** (recommended)
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=dodog&repository=librelink&category=integration)
 
-2. Add this repository
+2. Add this repository `https://github.com/dodog/librelink` in HACS
 3. Click **download** on bottom right corner and install it.
 4. Restart Home Assistant.
 
