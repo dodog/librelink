@@ -214,6 +214,8 @@ class LibreLinkAPI:
                 raise LibreLinkAPIAuthenticationError()
             response.raise_for_status()
             return await response.json()
+        except LibreLinkAPIError:
+            raise
         except TimeoutError as e:
             raise LibreLinkAPIConnectionError("Timeout Error") from e
         except (aiohttp.ClientError, socket.gaierror) as e:
