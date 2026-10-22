@@ -24,6 +24,13 @@
                     "display_name": "Pseudonyme facultatif affiché à la place du vrai nom du patient. Laissez vide pour utiliser le vrai nom."
                 },
                 "description": "Sélectionnez le patient et l'unité de mesure souhaitée."
+            },
+            "reauth_confirm": {
+                "title": "Réauthentifier LibreLink",
+                "description": "La connexion LibreLinkUp pour {username} a été refusée. Veuillez saisir à nouveau le mot de passe.",
+                "data": {
+                    "password": "Mot de passe"
+                }
             }
         },
         "error": {
@@ -32,7 +39,8 @@
             "unknown": "Une erreur inconnue s'est produite."
         },
         "abort": {
-            "already_configured": "L'appareil est déjà configuré"
+            "already_configured": "L'appareil est déjà configuré",
+            "reauth_successful": "La réauthentification a réussi"
         }
     }
 } 

@@ -24,6 +24,13 @@
                     "display_name": "Nepovinná prezývka zobrazená namiesto skutočného mena pacienta. Ak ho ponecháte prázdne, použije sa skutočné meno."
                 },
                 "description": "Vyberte pacienta a preferovanú jednotku merania."
+            },
+            "reauth_confirm": {
+                "title": "Opätovné overenie LibreLink",
+                "description": "Prihlásenie do LibreLinkUp pre {username} bolo zamietnuté. Zadajte heslo znova.",
+                "data": {
+                    "password": "Heslo"
+                }
             }
         },
         "error": {
@@ -32,7 +39,8 @@
             "unknown": "Vyskytla sa neznáma chyba."
         },
         "abort": {
-            "already_configured": "Zariadenie je už nastavené"
+            "already_configured": "Zariadenie je už nastavené",
+            "reauth_successful": "Opätovné overenie bolo úspešné"
         }
     }
 } 

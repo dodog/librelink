@@ -24,6 +24,13 @@
                     "display_name": "Optional nickname shown instead of the patient's real name. Leave blank to use the real name."
                 },
                 "description": "Select the patient and preferred unit of measurement."
+            },
+            "reauth_confirm": {
+                "title": "Re-authenticate LibreLink",
+                "description": "The LibreLinkUp login for {username} was rejected. Please enter the password again.",
+                "data": {
+                    "password": "Password"
+                }
             }
         },
         "error": {
@@ -32,7 +39,8 @@
             "unknown": "Unknown error occurred."
         },
         "abort": {
-            "already_configured": "Device is already configured"
+            "already_configured": "Device is already configured",
+            "reauth_successful": "Re-authentication was successful"
         }
     }
 }

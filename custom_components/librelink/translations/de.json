@@ -24,6 +24,13 @@
                     "display_name": "Optionales Pseudonym, das anstelle des echten Namens des Patienten angezeigt wird. Leer lassen, um den echten Namen zu verwenden."
                 },
                 "description": "Wählen Sie den Patienten und die bevorzugte Maßeinheit aus."
+            },
+            "reauth_confirm": {
+                "title": "LibreLink erneut authentifizieren",
+                "description": "Die LibreLinkUp-Anmeldung für {username} wurde abgelehnt. Bitte geben Sie das Passwort erneut ein.",
+                "data": {
+                    "password": "Passwort"
+                }
             }
         },
         "error": {
@@ -32,7 +39,8 @@
             "unknown": "Ein unbekannter Fehler ist aufgetreten."
         },
         "abort": {
-            "already_configured": "Gerät ist bereits konfiguriert"
+            "already_configured": "Gerät ist bereits konfiguriert",
+            "reauth_successful": "Die erneute Authentifizierung war erfolgreich"
         }
     }
 }
