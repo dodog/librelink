@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from typing import Any
+
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -97,6 +100,56 @@ class LibreLinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             description_placeholders={
                 "documentation_url": "https://github.com/dodog/librelink"
             },
+        )
+
+    async def async_step_reauth(
+        self, entry_data: Mapping[str, Any]
+    ) -> config_entries.ConfigFlowResult:
+        """Start reauthentication when the stored credentials were rejected."""
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        """Ask for the password again and update the existing entry."""
+        entry = self._get_reauth_entry()
+        _errors: dict[str, str] = {}
+
+        if user_input is not None:
+            try:
+                client = LibreLinkAPI(
+                    base_url=entry.data[CONF_URL],
+                    session=async_create_clientsession(self.hass),
+                )
+                await client.async_login(
+                    entry.data[CONF_USERNAME], user_input[CONF_PASSWORD]
+                )
+            except LibreLinkAPIAuthenticationError as e:
+                LOGGER.warning(e)
+                _errors["base"] = "auth"
+            except LibreLinkAPIConnectionError as e:
+                LOGGER.error(e)
+                _errors["base"] = "connection"
+            except LibreLinkAPIError as e:
+                LOGGER.exception(e)
+                _errors["base"] = "unknown"
+            else:
+                return self.async_update_reload_and_abort(
+                    entry,
+                    data_updates={CONF_PASSWORD: user_input[CONF_PASSWORD]},
+                )
+
+        return self.async_show_form(
+            step_id="reauth_confirm",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_PASSWORD): TextSelector(
+                        TextSelectorConfig(type=TextSelectorType.PASSWORD),
+                    ),
+                }
+            ),
+            errors=_errors,
+            description_placeholders={"username": entry.data[CONF_USERNAME]},
         )
 
     async def async_step_patient(self, user_input=None):
