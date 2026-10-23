@@ -326,6 +326,20 @@ class TrendCalculator:
         }
         return arrow_map.get(arrow, None)
 
+    def _server_arrow_to_category(self, arrow: Any) -> Optional[str]:
+        """Map the LibreLinkUp integer TrendArrow (1-5) to a trend category.
+        Used only by the fallback trend.
+        """
+        if isinstance(arrow, bool) or not isinstance(arrow, int):
+            return None
+        return {
+            1: "FALLING_FAST",
+            2: "FALLING",
+            3: "STABLE",
+            4: "RISING",
+            5: "RISING_FAST",
+        }.get(arrow)
+
     def _trend_to_arrow(self, trend: str) -> str:
         arrow_map = {
             "FALLING_FAST": "↓",
@@ -360,7 +374,11 @@ class TrendCalculator:
             }
         latest = self.history[-1]
         server_trend = latest.get("TrendArrow", "")
-        trend_cat = self._arrow_to_trend_category(server_trend) or "STABLE"
+        trend_cat = (
+            self._server_arrow_to_category(server_trend)
+            or self._arrow_to_trend_category(server_trend)
+            or "STABLE"
+        )
         return {
             "trend": trend_cat,
             "rate": 0.0,

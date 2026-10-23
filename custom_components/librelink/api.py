@@ -88,11 +88,18 @@ class Patient:
     @classmethod
     def from_api_response_data(cls, data):
         """Create a Patient object from the API response data."""
+        sensor_info = data.get("sensor") or {}
+        device_info = data.get("patientDevice") or {}
+        # Diagnostic only: helps tell sensor models apart (Libre 2 vs 2 Plus etc.).
+        # Only the serial prefix is logged, so the line is safe to share.
         LOGGER.debug(
-            "Parsed sensor data pt=%r (type=%s) sn=%s",
-            data["sensor"].get("pt"),
-            type(data["sensor"].get("pt")).__name__,
-            data["sensor"].get("sn"),
+            "Parsed sensor data pt=%r (type=%s) w=%r dtid=%r v=%r sn_prefix=%s",
+            sensor_info.get("pt"),
+            type(sensor_info.get("pt")).__name__,
+            sensor_info.get("w"),
+            device_info.get("dtid"),
+            device_info.get("v"),
+            str(sensor_info.get("sn") or "")[:4],
         )
         return cls(
             id=data["patientId"],
@@ -181,8 +188,13 @@ class LibreLinkAPI:
         if response["status"] == 2:
             raise LibreLinkAPIAuthenticationError()
 
-        self._token = response["data"]["authTicket"]["token"]
-        self._account_id = response["data"]["user"]["id"]
+        try:
+            self._token = response["data"]["authTicket"]["token"]
+            self._account_id = response["data"]["user"]["id"]
+        except (KeyError, TypeError) as err:
+            raise LibreLinkAPIError(
+                f"Unexpected login response (status {response['status']})"
+            ) from err
 
     async def _call_api(
         self,
