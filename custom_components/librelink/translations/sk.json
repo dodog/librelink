@@ -18,9 +18,11 @@
                 "data": {
                     "patient_id": "Pacient",
                     "unit_of_measurement": "Jednotka merania",
-                    "display_name": "Zobrazované meno (nepovinné)"
+                    "display_name": "Zobrazované meno (nepovinné)",
+                    "sensor_lifespan": "Životnosť senzora"
                 },
                 "data_description": {
+                    "sensor_lifespan": "Ako dlho vydrží váš senzor. Možnosť „Automaticky“ odhaduje podľa typu senzora, čo môže byť pri modeloch Plus nesprávne. Neskôr to môžete zmeniť tlačidlom Konfigurovať.",
                     "display_name": "Nepovinná prezývka zobrazená namiesto skutočného mena pacienta. Ak ho ponecháte prázdne, použije sa skutočné meno."
                 },
                 "description": "Vyberte pacienta a preferovanú jednotku merania."
@@ -41,6 +43,26 @@
         "abort": {
             "already_configured": "Zariadenie je už nastavené",
             "reauth_successful": "Opätovné overenie bolo úspešné"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Možnosti LibreLink",
+                "description": "Vyberte životnosť senzora, ktorý používate. Nastavenie sa zachová pre nové senzory, preto ho zmeňte, len keď prejdete na iný typ senzora.",
+                "data": {
+                    "sensor_lifespan": "Životnosť senzora"
+                }
+            }
+        }
+    },
+    "selector": {
+        "sensor_lifespan": {
+            "options": {
+                "auto": "Automaticky (odhad podľa typu senzora)",
+                "14": "14 dní (Libre 2, Libre 3)",
+                "15": "15 dní (Libre 2 Plus, Libre 3 Plus)"
+            }
         }
     }
 } 

@@ -18,9 +18,11 @@
                 "data": {
                     "patient_id": "Patient",
                     "unit_of_measurement": "Maßeinheit",
-                    "display_name": "Anzeigename (optional)"
+                    "display_name": "Anzeigename (optional)",
+                    "sensor_lifespan": "Sensorlaufzeit"
                 },
                 "data_description": {
+                    "sensor_lifespan": "Wie lange Ihr Sensor hält. 'Automatisch' rät anhand des Sensortyps, was bei Plus-Modellen falsch sein kann. Sie können dies später über die Schaltfläche Konfigurieren ändern.",
                     "display_name": "Optionales Pseudonym, das anstelle des echten Namens des Patienten angezeigt wird. Leer lassen, um den echten Namen zu verwenden."
                 },
                 "description": "Wählen Sie den Patienten und die bevorzugte Maßeinheit aus."
@@ -41,6 +43,26 @@
         "abort": {
             "already_configured": "Gerät ist bereits konfiguriert",
             "reauth_successful": "Die erneute Authentifizierung war erfolgreich"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "LibreLink-Optionen",
+                "description": "Wählen Sie die Laufzeit des Sensors, den Sie verwenden. Die Einstellung bleibt für neue Sensoren erhalten; ändern Sie sie nur, wenn Sie auf einen anderen Sensortyp wechseln.",
+                "data": {
+                    "sensor_lifespan": "Sensorlaufzeit"
+                }
+            }
+        }
+    },
+    "selector": {
+        "sensor_lifespan": {
+            "options": {
+                "auto": "Automatisch (anhand des Sensortyps geschätzt)",
+                "14": "14 Tage (Libre 2, Libre 3)",
+                "15": "15 Tage (Libre 2 Plus, Libre 3 Plus)"
+            }
         }
     }
 }
