@@ -7,7 +7,7 @@ LOGGER: Logger = getLogger(__package__)
 
 NAME: Final = "LibreLink"
 DOMAIN: Final = "librelink"
-VERSION: Final = "1.4.2"
+VERSION: Final = "1.4.3"
 ATTRIBUTION: Final = "Data provided by https://libreview.com"
 LOGIN_URL: Final = "/llu/auth/login"
 CONNECTION_URL: Final = "/llu/connections"
@@ -45,6 +45,12 @@ GLUCOSE_TREND_MESSAGE: Final = {
 
 CONF_PATIENT_ID: Final = "patient_id"
 CONF_DISPLAY_NAME: Final = "display_name"
+
+# Sensor lifetime - user choice (stored in the config entry *options*).
+# "auto" -  old behavior
+CONF_SENSOR_LIFESPAN: Final = "sensor_lifespan"
+SENSOR_LIFESPAN_AUTO: Final = "auto"
+SENSOR_LIFESPAN_OPTIONS: Final = [SENSOR_LIFESPAN_AUTO, "14", "15"]
 
 REFRESH_RATE_MIN: Final = 1
 API_TIME_OUT_SECONDS: Final = 20

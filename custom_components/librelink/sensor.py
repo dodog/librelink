@@ -20,9 +20,11 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity import EntityCategory
 import homeassistant.util.dt as dt_util
 
+from .api import SENSOR_PLUS_LIFESPAN_DAYS
 from .const import (
     ATTRIBUTION,
     CONF_PATIENT_ID,
+    CONF_SENSOR_LIFESPAN,
     DOMAIN,
     GLUCOSE_TREND_ICON,
     GLUCOSE_TREND_MESSAGE,
@@ -60,8 +62,8 @@ async def async_setup_entry(
         TimeInRangeSensor(coordinator, pid, unit),
         TrendSensor(coordinator, pid),
         TrendArrowSensor(coordinator, pid),
-        ApplicationTimestampSensor(coordinator, pid),
-        ExpirationTimestampSensor(coordinator, pid),
+        ApplicationTimestampSensor(coordinator, pid, config_entry),
+        ExpirationTimestampSensor(coordinator, pid, config_entry),
         LastMeasurementTimestampSensor(coordinator, pid),
         RateOfChangeSensor(coordinator, pid, unit),
         Delta1MinSensor(coordinator, pid, unit),
@@ -659,6 +661,21 @@ class TimestampSensor(LibreLinkSensor):
 class ApplicationTimestampSensor(TimestampSensor):
     """Sensor Days Sensor class."""
 
+    def __init__(self, coordinator, patient_id, config_entry: ConfigEntry) -> None:
+        """Initialize the sensor.
+
+        The config entry is passed explicitly (not read from the coordinator): the
+        coordinator is shared by every patient on one login, but the sensor
+        lifetime is a per-patient option.
+        """
+        super().__init__(coordinator, patient_id)
+        self._config_entry = config_entry
+
+    @property
+    def _lifespan_override(self):
+        """Return the sensor lifetime chosen in the options ("14"/"15"/"auto"/None)."""
+        return self._config_entry.options.get(CONF_SENSOR_LIFESPAN)
+
     @property
     def name(self):
         """Return the name of the sensor."""
@@ -683,12 +700,13 @@ class ApplicationTimestampSensor(TimestampSensor):
             "Patient": self._data.name,
         })
         if self.available:
+            lifespan = self._data.device.lifespan_days(self._lifespan_override)
             attrs.update({
                 "Serial number": self._data.device.serial_number,
                 "Activation date": self._data.device.application_timestamp,
                 "Sensor product type": self._data.device.product_type,
-                "Sensor lifespan days": self._data.device.sensor_lifespan,
-                "Sensor plus model": self._data.device.is_plus_sensor,
+                "Sensor lifespan days": lifespan,
+                "Sensor plus model": lifespan == SENSOR_PLUS_LIFESPAN_DAYS,
             })
         return attrs
 
@@ -703,7 +721,7 @@ class ExpirationTimestampSensor(ApplicationTimestampSensor):
     @property
     def native_value(self):
         """Return the native value of the sensor."""
-        return self._data.device.expiration_timestamp
+        return self._data.device.expiration_for(self._lifespan_override)
 
 class LastMeasurementTimestampSensor(TimestampSensor):
     """Sensor Delay Sensor class."""

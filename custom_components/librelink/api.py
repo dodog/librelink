@@ -20,10 +20,16 @@ from .const import (
 
 SENSOR_DEFAULT_LIFESPAN_DAYS = 14
 SENSOR_PLUS_LIFESPAN_DAYS = 15
+# This is only a best guess (Libre 2 and Libre 2 Plus both report 3). Override in options.
 SENSOR_LIFESPAN_DAYS = {
-    3: SENSOR_DEFAULT_LIFESPAN_DAYS,  # Libre 2 & maybe Libre 3 standard (14 days)
-    4: SENSOR_PLUS_LIFESPAN_DAYS,     # Libre 3 Plus & maybe Libre 2 Plus (15 days)
+    3: SENSOR_DEFAULT_LIFESPAN_DAYS,  # Libre 2 (14d) and also Libre 2 plus (15d)
+    4: SENSOR_PLUS_LIFESPAN_DAYS,     # Libre 3 Plus (15d) and maybe Libre 3 (14d) also
 }
+# Lifespan select manually
+SENSOR_SELECTABLE_LIFESPAN_DAYS = (
+    SENSOR_DEFAULT_LIFESPAN_DAYS,
+    SENSOR_PLUS_LIFESPAN_DAYS,
+)
 
 
 @dataclass
@@ -68,6 +74,27 @@ class LibreLinkDevice:
             return None
         return self.application_timestamp + timedelta(days=self.sensor_lifespan)
 
+    def lifespan_days(self, override: str | int | None = None) -> int:
+        """Return the lifespan in days, preferring a valid user-selected value.
+
+        `override` is the stored option ("14", "15", "auto" or None)
+        """
+        try:
+            days = int(override)
+        except (TypeError, ValueError):
+            return self.sensor_lifespan
+        if days in SENSOR_SELECTABLE_LIFESPAN_DAYS:
+            return days
+        return self.sensor_lifespan
+
+    def expiration_for(self, override: str | int | None = None):
+        """Return the expiration timestamp using an optional user-selected lifetime."""
+        if self.application_timestamp is None:
+            return None
+        return self.application_timestamp + timedelta(
+            days=self.lifespan_days(override)
+        )
+
 
 @dataclass
 class Patient:
@@ -88,11 +115,17 @@ class Patient:
     @classmethod
     def from_api_response_data(cls, data):
         """Create a Patient object from the API response data."""
+        sensor_info = data.get("sensor") or {}
+        device_info = data.get("patientDevice") or {}
+        # Diagnostic only: helps tell sensor models apart. Only the serial prefix is logged.
         LOGGER.debug(
-            "Parsed sensor data pt=%r (type=%s) sn=%s",
-            data["sensor"].get("pt"),
-            type(data["sensor"].get("pt")).__name__,
-            data["sensor"].get("sn"),
+            "Parsed sensor data pt=%r (type=%s) w=%r dtid=%r v=%r sn_prefix=%s",
+            sensor_info.get("pt"),
+            type(sensor_info.get("pt")).__name__,
+            sensor_info.get("w"),
+            device_info.get("dtid"),
+            device_info.get("v"),
+            str(sensor_info.get("sn") or "")[:4],
         )
         return cls(
             id=data["patientId"],
@@ -181,8 +214,14 @@ class LibreLinkAPI:
         if response["status"] == 2:
             raise LibreLinkAPIAuthenticationError()
 
-        self._token = response["data"]["authTicket"]["token"]
-        self._account_id = response["data"]["user"]["id"]
+        # Any other non-success reply 
+        try:
+            self._token = response["data"]["authTicket"]["token"]
+            self._account_id = response["data"]["user"]["id"]
+        except (KeyError, TypeError) as err:
+            raise LibreLinkAPIError(
+                f"Unexpected login response (status {response['status']})"
+            ) from err
 
     async def _call_api(
         self,
