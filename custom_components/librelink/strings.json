@@ -18,9 +18,11 @@
                 "data": {
                     "patient_id": "Patient",
                     "unit_of_measurement": "Unit of Measurement",
-                    "display_name": "Display name (optional)"
+                    "display_name": "Display name (optional)",
+                    "sensor_lifespan": "Sensor lifetime"
                 },
                 "data_description": {
+                    "sensor_lifespan": "How long your sensor lasts. 'Automatic' guesses from the sensor type, which can be wrong for Plus models. You can change this later with the Configure button.",
                     "display_name": "Optional nickname shown instead of the patient's real name. Leave blank to use the real name."
                 },
                 "description": "Select the patient and preferred unit of measurement."
@@ -41,6 +43,26 @@
         "abort": {
             "already_configured": "Device is already configured",
             "reauth_successful": "Re-authentication was successful"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "LibreLink options",
+                "description": "Choose the lifetime of the sensor you are using. The setting is kept for new sensors, so change it only when you switch to a different sensor type.",
+                "data": {
+                    "sensor_lifespan": "Sensor lifetime"
+                }
+            }
+        }
+    },
+    "selector": {
+        "sensor_lifespan": {
+            "options": {
+                "auto": "Automatic (guess from sensor type)",
+                "14": "14 days (Libre 2, Libre 3)",
+                "15": "15 days (Libre 2 Plus, Libre 3 Plus)"
+            }
         }
     }
 }
