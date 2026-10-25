@@ -75,10 +75,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: LibreLinkConfigEntry) ->
     # across multiple patients/entries under the same LibreLinkUp account).
     entry.runtime_data = coordinator
 
+    # Re-render patient's entities when the sensor lifetime change 
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
+
     # Then launch async_setup_entry for our declared entities in sensor.py and binary_sensor.py
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
+
+
+async def _async_update_listener(
+    hass: HomeAssistant, entry: LibreLinkConfigEntry
+) -> None:
+    """Refresh entity states after the entry's options or data changed."""
+    entry.runtime_data.async_update_listeners()
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: LibreLinkConfigEntry) -> bool:
