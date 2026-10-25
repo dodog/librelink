@@ -22,6 +22,7 @@ For every patient linked to your LibreLinkUp account, this integration creates a
 - 📈 **Enhanced trend calculation** — More accurate than the sensor's native trend. Uses a weighted average across multiple time windows (1-min, 5-min, 15-min) with smoothing logic to reduce noise and better reflect true physiological changes, instead of relying on the sensor's raw native trend.
 - 🎯 **Time In Range (24h)** — Rolling 24-hour percentage of readings within your target range, persisted across Home Assistant restarts.
 - 🩸 **Per-patient sensors** — automatically sets up entities for every patient linked to your LibreLinkUp account.
+- ⏳ **Sensor expiry** — shows when the current sensor was applied and when it expires.
 - ⚠️ **High/low binary sensors** — instantly know when glucose is out of range.
 - 🖥️ **Configured entirely through the Home Assistant UI** — no YAML required to get started.
 - 🔁 **Session-based authentication** — token retrieved automatically for the duration of the Home Assistant session.
@@ -33,14 +34,15 @@ For every patient linked to your LibreLinkUp account, this integration creates a
 
 | Sensor | Description |
 |---|---|
-| Expiration of Sensor (days) | Number of days remaining until the CGM sensor expires |
-| Glucose Measurement (mg/dL) | Latest glucose reading, updated every minute. |
+| Measurement | Latest glucose reading, updated every minute, in the unit chosen during setup (mg/dL or mmol/L). |
 | Time In Range (24h) | Percentage of readings within your target range over a rolling 24-hour window. Survives Home Assistant restarts by rebuilding from recorder history. |
-| Glucose Trend | Direction and speed of glucose change, classified using clinical thresholds. |
-| Trend Arrow | Visual arrow indicator: ↑ ↗ → ↘ ↓ |
+| Trend | Direction and speed of glucose change, classified using clinical thresholds. |
+| Glucose Trend Arrow | Visual arrow indicator: ↑ ↗ → ↘ ↓ |
 | Rate of Change | Precise speed of change, in mg/dL/min or mmol/L/min. |
-| Delta 1 / 5 / 15 Min | Absolute change in glucose over the last 1, 5, and 15 minutes (mg/dL or mmol/L). |
-| Minutes Since Update | Time elapsed since the last reading was received. |
+| Delta 1min / Delta 5min / Delta 15min | Absolute change in glucose over the last 1, 5, and 15 minutes (mg/dL or mmol/L). Needs a few minutes of history after a restart. |
+| Application Timestamp | When the current sensor was activated. Attributes show the serial number and the sensor lifetime in use. |
+| Expiration Timestamp | When the current sensor expires: activation time plus the [sensor lifetime](#sensor-lifetime-14-or-15-days). |
+| Last Measurement Timestamp | Time of the latest reading received from LibreLinkUp. |
 
 
 ### `binary_sensor`
@@ -66,9 +68,9 @@ or you can use [LibreLink Extended Card](https://github.com/dodog/librelink-exte
 ### Via **[HACS](https://hacs.xyz/)** (recommended)
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=dodog&repository=librelink&category=integration)
 
-2. Add this repository `https://github.com/dodog/librelink` in HACS
-3. Click **download** on bottom right corner and install it.
-4. Restart Home Assistant.
+1. Add this repository `https://github.com/dodog/librelink` in HACS
+2. Click **download** on bottom right corner and install it.
+3. Restart Home Assistant.
 
 
 ### Manual
@@ -86,13 +88,42 @@ Configuration is done entirely from the Home Assistant UI:
 
 1. Go to **Settings → Devices & Services → Integrations**.
 2. Click **+ Add Integration** and search for **Librelink**.
-3. Enter the **username (email)** and **password** of your LibreLinkUp account, not Libreview.
+3. Enter the **username (email)** and **password** of your LibreLinkUp account, not Libreview, and select your region.
+4. Select the **patient**, the **unit** for glucose values, and the **sensor lifetime** (see below). You can also enter an optional **display name**: a nickname used in the integration's title instead of the patient's real name.
+
+If an account has several patients, add the integration once per patient. A patient can only be added once.
 
 **Requirements:**
 - A valid LibreLinkUp account.
 - You must have accepted the Abbott user agreement inside the LibreLinkUp mobile app before the integration can retrieve data.
 
 > An authentication token is retrieved automatically and remains valid for the duration of the Home Assistant session — no manual token management needed.
+
+### Sensor lifetime (14 or 15 days)
+
+LibreLinkUp does not report when a sensor expires, so the integration calculates it: **activation time + sensor lifetime**. The lifetime cannot be read reliably from the data either.
+
+You therefore choose the lifetime:
+
+| Option | Meaning |
+|---|---|
+| **Automatic** (default) | Old behaviour - a guess from the reported sensor type: type 3 → 14 days, type 4 → 15 days. This can be wrong, for example a Libre 2 Plus would be shown as 14 days. |
+| **14 days** | Libre 2, Libre 3 |
+| **15 days** | Libre 2 Plus, Libre 3 Plus |
+
+The choice is saved for that patient and applies to every new sensor you activate, so you only need to change it when you switch to a different sensor type. To change it later, open **Settings → Devices & Services → LibreLink** and click **Configure** on the patient's entry. The *Expiration Timestamp* updates immediately, no restart needed.
+
+### If your login stops working
+
+If LibreLinkUp rejects the saved login (for example because you changed your password), polling stops and Home Assistant shows a repair notice for the integration. Click **Reconfigure** on the entry and enter the new password. The entry reloads and keeps its entities and recorded history; trend and delta values need a few minutes to rebuild.
+
+## Removal
+
+1. Go to **Settings → Devices & Services → LibreLink**.
+2. Open the **⋮** menu of a patient's entry and choose **Delete**. Repeat for every patient.
+3. If you installed via HACS, you can then remove the integration in HACS and restart Home Assistant.
+
+Deleting an entry removes its devices and entities from Home Assistant. Your LibreLinkUp account and your data at Abbott are not affected.
                                               
 
 
