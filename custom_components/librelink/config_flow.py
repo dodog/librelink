@@ -157,8 +157,19 @@ class LibreLinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             user_input |= self.basic_info
 
+            patient_id = user_input[CONF_PATIENT_ID]
+
+            # The same patient must only be configured once
+            if any(
+                entry.data.get(CONF_PATIENT_ID) == patient_id
+                for entry in self._async_current_entries()
+            ):
+                return self.async_abort(reason="already_configured")
+            await self.async_set_unique_id(patient_id)
+            self._abort_if_unique_id_configured()
+
             patient = {patient.id: patient for patient in self.patients}.get(
-                user_input[CONF_PATIENT_ID]
+                patient_id
             )
 
             # Optional nickname: if provided, used for the config entry title
