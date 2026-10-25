@@ -14,6 +14,7 @@ from homeassistant.const import (
     CONF_URL,
     CONF_USERNAME,
 )
+from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.selector import (
     SelectOptionDict,
@@ -31,14 +32,42 @@ from .api import (
     LibreLinkAPIConnectionError,
     LibreLinkAPIError,
 )
-from .const import BASE_URL_LIST, CONF_DISPLAY_NAME, CONF_PATIENT_ID, DOMAIN, LOGGER
+from .const import (
+    BASE_URL_LIST,
+    CONF_DISPLAY_NAME,
+    CONF_PATIENT_ID,
+    CONF_SENSOR_LIFESPAN,
+    DOMAIN,
+    LOGGER,
+    SENSOR_LIFESPAN_AUTO,
+    SENSOR_LIFESPAN_OPTIONS,
+)
 from .units import UNITS_OF_MEASUREMENT
+
+
+def _lifespan_selector() -> SelectSelector:
+    """Dropdown for the sensor lifetime."""
+    return SelectSelector(
+        SelectSelectorConfig(
+            options=SENSOR_LIFESPAN_OPTIONS,
+            mode=SelectSelectorMode.DROPDOWN,
+            translation_key=CONF_SENSOR_LIFESPAN,
+        )
+    )
 
 
 class LibreLinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for LibreLink."""
 
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> LibreLinkOptionsFlow:
+        """Return the options flow (Configure button)."""
+        return LibreLinkOptionsFlow()
 
     async def async_step_user(
         self,
@@ -178,9 +207,17 @@ class LibreLinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             display_name = (user_input.get(CONF_DISPLAY_NAME) or "").strip()
             title_name = display_name or patient.name
 
+            # The sensor lifetime is an option (changeable later via Configure), not part of the entry data.
+            options = {
+                CONF_SENSOR_LIFESPAN: user_input.pop(
+                    CONF_SENSOR_LIFESPAN, SENSOR_LIFESPAN_AUTO
+                )
+            }
+
             return self.async_create_entry(
                 title=f"{title_name} (via {user_input[CONF_USERNAME]})",
                 data=user_input,
+                options=options,
             )
 
         return self.async_show_form(
@@ -205,6 +242,34 @@ class LibreLinkFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Optional(CONF_DISPLAY_NAME): TextSelector(
                         TextSelectorConfig(type=TextSelectorType.TEXT),
                     ),
+                    vol.Optional(
+                        CONF_SENSOR_LIFESPAN, default=SENSOR_LIFESPAN_AUTO
+                    ): _lifespan_selector(),
+                }
+            ),
+        )
+
+
+class LibreLinkOptionsFlow(config_entries.OptionsFlow):
+    """Options flow: change the sensor lifetime when switching sensor type."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        """Show/save the sensor lifetime option."""
+        if user_input is not None:
+            return self.async_create_entry(data=user_input)
+
+        current = self.config_entry.options.get(
+            CONF_SENSOR_LIFESPAN, SENSOR_LIFESPAN_AUTO
+        )
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        CONF_SENSOR_LIFESPAN, default=current
+                    ): _lifespan_selector(),
                 }
             ),
         )
