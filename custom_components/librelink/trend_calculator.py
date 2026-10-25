@@ -327,8 +327,7 @@ class TrendCalculator:
         return arrow_map.get(arrow, None)
 
     def _server_arrow_to_category(self, arrow: Any) -> Optional[str]:
-        """Map the LibreLinkUp integer TrendArrow (1-5) to a trend category. Only fallback.
-        """
+        """Map the LibreLinkUp integer TrendArrow (1-5) to a trend category. Only fallback."""
         if isinstance(arrow, bool) or not isinstance(arrow, int):
             return None
         return {
