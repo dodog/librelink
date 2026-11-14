@@ -63,6 +63,9 @@ See the full example here: [mini-graph-glucose.yml](https://github.com/dodog/lib
 or you can use [LibreLink Extended Card](https://github.com/dodog/librelink-extended-card)    
 <img width="586" height="265" alt="librelink-extended-card-screenshot" src="https://raw.githubusercontent.com/dodog/librelink-extended-card/refs/heads/main/assets/screenshot.jpg" />
 
+or [SugarTV Card](https://github.com/wiltodelta/homeassistant-sugartv-card), which finds this integration's trend and measurement time on its own (`glucose_value: sensor.jane_doe_measurement`)
+<img width="600" alt="SugarTV Card in a wide and a tall dashboard slot" src="https://raw.githubusercontent.com/wiltodelta/homeassistant-sugartv-card/v0.18.0/sugartv-card-layouts.png" />
+
 ## Installation
 
 ### Via **[HACS](https://hacs.xyz/)** (recommended)
